@@ -18,13 +18,43 @@ ros.on('close', function() {
 const cmdAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_angle',
-    messageType: 'std_msgs/Float32'
+    messageType: 'std_msgs/Float64'
 });
 
 const cmdDuty = new ROSLIB.Topic({
     ros: ros,
-    name: '/cmd_duty',
+    name: '/cmd_shooting_duty',
     messageType: 'std_msgs/Int16'
+});
+
+const cmdToggleShoot = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_toggle_shoot',
+    messageType: 'std_msgs/Bool'
+});
+
+const cmdToggleReceive = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_toggle_receive',
+    messageType: 'std_msgs/Bool'
+});
+
+const cmdToggleBelt = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_toggle_belt',
+    messageType: 'std_msgs/Bool'
+});
+
+const cmdEmergencyStop = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_emergency_stop',
+    messageType: 'std_msgs/Bool'
+});
+
+const currentAngle = new ROSLIB.Topic({
+    ros: ros,
+    name: '/current_angle',
+    messageType: 'std_msgs/Float64'
 });
 
 
@@ -37,8 +67,8 @@ class Object {
     }
 
     draw(ctx) {}
+    onClick(ctx) {}
     checkIfClicked(point) {}
-    clicked(ctx) {}
 }
 
 class Rectangle extends Object {
@@ -62,7 +92,7 @@ class Rectangle extends Object {
         ctx.restore();
     }
 
-    clicked(ctx) {
+    onClick(ctx) {
         ctx.save();
         ctx.clearRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
         ctx.fillStyle = "red";
@@ -93,11 +123,11 @@ class Pole extends Rectangle {
         this.type = PoleTypes[no];
         this.no = no;
     }
-    clicked(ctx) {
-        super.clicked(ctx);
+    onClick(ctx) {
+        super.onClick(ctx);
         console.info("Aiming at Type " + this.type + " pole.");
         const angle = new ROSLIB.Message({
-            data: PoleAngles[no]
+            data: PoleAngles[this.no]
         })
         cmdAngle.publish(angle);
         const duty = new ROSLIB.Message({
@@ -172,7 +202,7 @@ const main = () => {
 
         items.forEach(item => {
             if (item.checkIfClicked(point)) {
-                item.clicked(ctx);
+                item.onClick(ctx);
             }
         });
     });
