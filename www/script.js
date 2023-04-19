@@ -97,7 +97,7 @@ class Pole extends Rectangle {
         super.clicked(ctx);
         console.info("Aiming at Type " + this.type + " pole.");
         const angle = new ROSLIB.Message({
-            data: PoleAngles[no]
+            data: PoleAngles[this.no]
         })
         cmdAngle.publish(angle);
         const duty = new ROSLIB.Message({
