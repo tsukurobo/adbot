@@ -63,9 +63,6 @@ const currentAngle = new ROSLIB.Topic({
     messageType: 'std_msgs/Float64'
 });
 
-
-
-
 var targetAngle = 0;
 var targetDuty = 0;
 
@@ -184,10 +181,7 @@ class Pole extends Rectangle {
         targetAngle = PoleTargetAngles[this.no];
         updateAngle(targetAngle, ctx);
         targetDuty = PoleTargetDuties[this.no];
-        const duty = new ROSLIB.Message({
-            data: targetDuty
-        })
-        cmdDuty.publish(duty);
+        updateDuty(targetDuty, ctx);
     }
 }
 
