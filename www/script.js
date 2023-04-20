@@ -109,8 +109,7 @@ function updateLidar(state, ctx) {
 
 
 // canvas
-// Base Class
-class Object {
+class Object { // Base Class
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -143,11 +142,7 @@ class Rectangle extends Object {
     }
 
     onClick(ctx, timeout = 300) {
-        ctx.save();
-        ctx.clearRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-        ctx.restore();
+        this.draw(ctx, "red");
         setTimeout(() => {
             this.draw(ctx);
         }, timeout);
@@ -161,7 +156,6 @@ class Rectangle extends Object {
 
 const PoleTypes = [];
 PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
-
 const PoleCoordinates = [];
 PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665], [550, 540], [425, 415], [675, 415], [300, 140], [550, 140], [800, 140]);
 const PoleTargetAngles = [];
