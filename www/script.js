@@ -45,6 +45,12 @@ const cmdToggleBelt = new ROSLIB.Topic({
     messageType: 'std_msgs/Bool'
 });
 
+const cmdToggleLidar = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_toggle_lidar',
+    messageType: 'std_msgs/Bool'
+});
+
 const cmdEmergencyStop = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_emergency_stop',
@@ -58,11 +64,6 @@ const currentAngle = new ROSLIB.Topic({
 });
 
 
-const currentAngle = new ROSLIB.Topic({
-    ros: ros,
-    name: '/current_angle',
-    messageType: 'std_msgs/Float64'
-});
 
 
 var targetAngle = 0;
@@ -94,12 +95,20 @@ function updateDuty(newDuty, ctx) {
     ctx.restore();
 }
 
-function updateBelt(state, ctx) {
+function updateBelt(state, ctx) { // Currently the status is not displayed. To be added.
     const toggle = new ROSLIB.Message({
         data: state
     })
     cmdToggleBelt.publish(toggle);
 }
+
+function updateLidar(state, ctx) {
+    const toggle = new ROSLIB.Message({
+        data: state
+    })
+    cmdToggleLidar.publish(toggle);
+}
+
 
 
 // canvas
@@ -124,9 +133,9 @@ class Rectangle extends Object {
         this.color = color;
     }
 
-    draw(ctx) {
+    draw(ctx, color = this.color) {
         ctx.save();
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = color;
         ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
         ctx.fillStyle = "white";
         ctx.font = 'bold 48px "Roboto", sans-serif';
@@ -136,7 +145,7 @@ class Rectangle extends Object {
         ctx.restore();
     }
 
-    onClick(ctx) {
+    onClick(ctx, timeout = 300) {
         ctx.save();
         ctx.clearRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
         ctx.fillStyle = "red";
@@ -144,7 +153,7 @@ class Rectangle extends Object {
         ctx.restore();
         setTimeout(() => {
             this.draw(ctx);
-        }, 300);
+        }, timeout);
     }
 
     checkIfClicked(point) {
@@ -195,6 +204,7 @@ class Shoot extends Rectangle {
         cmdToggleShoot.publish(toggle);
     }
 }
+
 class Receive extends Rectangle {
     constructor(x, y) {
         super(x, y, 300, 100, 'Receive', 'blue');
@@ -210,9 +220,10 @@ class Receive extends Rectangle {
     }
 }
 
+
 class Emergency extends Rectangle {
     constructor(x, y) {
-        super(x, y, 300, 100, 'Emergency', 'yellow');
+        super(x, y, 300, 100, 'Emergency', 'gray');
     }
 
     onClick(ctx) {
@@ -225,33 +236,56 @@ class Emergency extends Rectangle {
     }
 }
 
-class Belt extends Rectangle {
+class StatusButton extends Rectangle {
+    constructor(x, y, w, h, str, defaultColor, changedColor) {
+        super(x, y, w, h, str, defaultColor);
+        this.changedColor = changedColor;
+        this.status = false;
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx, 0);
+        this.status = !this.status;
+    }
+
+    draw(ctx) {
+        super.draw(ctx, this.status ? this.changedColor : this.defaultColor);
+    }
+}
+
+class Belt extends StatusButton {
     constructor(x, y) {
-        super(x, y, 300, 100, 'Belt', 'blue');
-        this.isWorking = false;
-        this.colorWhenWorking = 'green';
+        super(x, y, 300, 100, 'Belt', 'blue', 'green');
     }
 
     onClick(ctx) {
         super.onClick(ctx);
-        console.info("Turn Belt");
-        this.isWorking = !this.isWorking;
-        updateBelt(this.isWorking, ctx);
+        updateBelt(this.status, ctx);
+    }
+}
+
+class Lidar extends StatusButton {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Lidar', 'blue', 'green');
     }
 
-    draw(ctx) {
-        if (this.isWorking) {
-            super.draw(ctx);
+    onClick(ctx) {
+        super.onClick(ctx);
+        updateLidar(this.status, ctx);
+    }
+}
+
+class FullScreen extends StatusButton {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Full Screen', 'blue', 'green');
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        if (this.status) {
+            document.documentElement.requestFullscreen();
         } else {
-            ctx.save();
-            ctx.fillStyle = this.colorWhenWorking;
-            ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-            ctx.fillStyle = "white";
-            ctx.font = 'bold 48px "Roboto", sans-serif';
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.str, this.x, this.y);
-            ctx.restore();
+            document.exitFullscreen();
         }
     }
 }
@@ -328,6 +362,12 @@ const main = () => {
     const belt = new Belt(1650, 350);
     items.push(belt);
 
+    const fullScreen = new FullScreen(1250, 50);
+    items.push(fullScreen);
+
+    const lidar = new Lidar(1650, 50);
+    items.push(lidar);
+
     const directionalPadSmall = new DirectionalPad(1700, 550, 75, 75, 1, 5, 'blue');
     items.push(directionalPadSmall.up);
     items.push(directionalPadSmall.down);
@@ -373,7 +413,7 @@ const main = () => {
 
 
 
-    listener.subscribe(function (message) {
+    currentAngle.subscribe(function (message) {
         ctx.save();
         ctx.font = '48px serif';
         ctx.clearRect(1400, 750, 200, 50);
