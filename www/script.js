@@ -109,20 +109,11 @@ function updateLidar(state, ctx) {
 
 
 // canvas
-class Object { // Base Class
-    constructor(x, y) {
+
+class Rectangle{
+    constructor(x, y, w, h, str, color) {
         this.x = x;
         this.y = y;
-    }
-
-    draw(ctx) { }
-    onClick(ctx) { }
-    checkIfClicked(point) { }
-}
-
-class Rectangle extends Object {
-    constructor(x, y, w, h, str, color) {
-        super(x, y);
         this.w = w;
         this.h = h;
         this.str = str;
