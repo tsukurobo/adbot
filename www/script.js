@@ -3,15 +3,15 @@ const ros = new ROSLIB.Ros({
     url: 'ws://localhost:9090'
 });
 
-ros.on('connection', function() {
+ros.on('connection', function () {
     console.log('Connected to websocket server.');
 });
 
-ros.on('error', function(error) {
+ros.on('error', function (error) {
     console.log('Error connecting to websocket server: ', error);
 });
 
-ros.on('close', function() {
+ros.on('close', function () {
     console.log('Connection to websocket server closed.');
 });
 
@@ -58,6 +58,50 @@ const currentAngle = new ROSLIB.Topic({
 });
 
 
+const currentAngle = new ROSLIB.Topic({
+    ros: ros,
+    name: '/current_angle',
+    messageType: 'std_msgs/Float64'
+});
+
+
+var targetAngle = 0;
+var targetDuty = 0;
+
+function updateAngle(newAngle, ctx) {
+    targetAngle = newAngle;
+    ctx.save();
+    ctx.font = '48px serif';
+    ctx.clearRect(1400, 800, 200, 50);
+    ctx.fillText(targetAngle, 1400, 850);
+    const angle = new ROSLIB.Message({
+        data: targetAngle
+    })
+    cmdAngle.publish(angle);
+    ctx.restore();
+}
+
+function updateDuty(newDuty, ctx) {
+    targetDuty = newDuty;
+    ctx.save();
+    ctx.font = '48px serif';
+    ctx.clearRect(1400, 750, 200, 50);
+    ctx.fillText(targetDuty, 1400, 800);
+    const duty = new ROSLIB.Message({
+        data: targetDuty
+    })
+    cmdDuty.publish(duty);
+    ctx.restore();
+}
+
+function updateBelt(state, ctx) {
+    const toggle = new ROSLIB.Message({
+        data: state
+    })
+    cmdToggleBelt.publish(toggle);
+}
+
+
 // canvas
 // Base Class
 class Object {
@@ -66,9 +110,9 @@ class Object {
         this.y = y;
     }
 
-    draw(ctx) {}
-    onClick(ctx) {}
-    checkIfClicked(point) {}
+    draw(ctx) { }
+    onClick(ctx) { }
+    checkIfClicked(point) { }
 }
 
 class Rectangle extends Object {
@@ -114,8 +158,10 @@ PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
 
 const PoleCoordinates = [];
 PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665], [550, 540], [425, 415], [675, 415], [300, 140], [550, 140], [800, 140]);
-const PoleAngles = [];
-PoleAngles.push(-20, -20, -10, -10, -10, 0, 10, 10, 10, 20, 20);
+const PoleTargetAngles = [];
+PoleTargetAngles.push(-20, -20, -10, -10, -10, 0, 10, 10, 10, 20, 20);
+const PoleTargetDuties = [];
+PoleTargetDuties.push(400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400);
 
 class Pole extends Rectangle {
     constructor(x, y, no) {
@@ -126,14 +172,127 @@ class Pole extends Rectangle {
     onClick(ctx) {
         super.onClick(ctx);
         console.info("Aiming at Type " + this.type + " pole.");
-        const angle = new ROSLIB.Message({
-            data: PoleAngles[this.no]
-        })
-        cmdAngle.publish(angle);
+        targetAngle = PoleTargetAngles[this.no];
+        updateAngle(targetAngle, ctx);
+        targetDuty = PoleTargetDuties[this.no];
         const duty = new ROSLIB.Message({
-            data: 400
+            data: targetDuty
         })
         cmdDuty.publish(duty);
+    }
+}
+
+class Shoot extends Rectangle {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Shoot', 'blue');
+    }
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Shooting");
+        const toggle = new ROSLIB.Message({
+            data: true
+        })
+        cmdToggleShoot.publish(toggle);
+    }
+}
+class Receive extends Rectangle {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Receive', 'blue');
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Receiving");
+        const toggle = new ROSLIB.Message({
+            data: true
+        })
+        cmdToggleReceive.publish(toggle);
+    }
+}
+
+class Emergency extends Rectangle {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Emergency', 'yellow');
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Emergency stop");
+        const toggle = new ROSLIB.Message({
+            data: true
+        })
+        cmdToggleEmergency.publish(toggle);
+    }
+}
+
+class Belt extends Rectangle {
+    constructor(x, y) {
+        super(x, y, 300, 100, 'Belt', 'blue');
+        this.isWorking = false;
+        this.colorWhenWorking = 'green';
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Turn Belt");
+        this.isWorking = !this.isWorking;
+        updateBelt(this.isWorking, ctx);
+    }
+
+    draw(ctx) {
+        if (this.isWorking) {
+            super.draw(ctx);
+        } else {
+            ctx.save();
+            ctx.fillStyle = this.colorWhenWorking;
+            ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
+            ctx.fillStyle = "white";
+            ctx.font = 'bold 48px "Roboto", sans-serif';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.str, this.x, this.y);
+            ctx.restore();
+        }
+    }
+}
+
+class DutyAdjustor extends Rectangle {
+    constructor(x, y, w, h, diff, color) {
+        super(x, y, w, h, diff >= 0 ? '↑' : '↓', color);
+        this.diff = diff;
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Adjusting Duty to " + targetDuty);
+        targetDuty += this.diff;
+        updateDuty(targetDuty, ctx);
+    }
+}
+
+class AngleAdjustor extends Rectangle {
+    constructor(x, y, w, h, diff, color) {
+        super(x, y, w, h, diff >= 0 ? '→' : '←', color);
+        this.diff = diff;
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Adjusting Angle to " + targetAngle);
+        targetAngle += this.diff;
+        updateAngle(targetAngle, ctx);
+    }
+}
+
+class DirectionalPad {
+    constructor(x, y, buttonWidth, buttonHeight, angleDiff, dutyDiff, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.up = new DutyAdjustor(x, y - buttonHeight, buttonWidth, buttonHeight, dutyDiff, color);
+        this.down = new DutyAdjustor(x, y + buttonHeight, buttonWidth, buttonHeight, -dutyDiff, color);
+        this.left = new AngleAdjustor(x - buttonWidth, y, buttonWidth, buttonHeight, -angleDiff, color);
+        this.right = new AngleAdjustor(x + buttonWidth, y, buttonWidth, buttonHeight, angleDiff, color);
     }
 }
 
@@ -157,38 +316,70 @@ const main = () => {
         items.push(pole);
     }
     // Other control objects
-    const shoot = new Rectangle(1200, 200, 300, 100, 'Shoot', 'blue');
+    const shoot = new Shoot(1250, 200);
     items.push(shoot);
 
-    const receive = new Rectangle(1650, 200, 300, 100, 'Receive', 'blue');
+    const receive = new Receive(1650, 200);
     items.push(receive);
 
-    const duty_up = new Rectangle(1700, 400, 75, 75, '↑', 'blue');
-    items.push(duty_up);
+    const emergency = new Emergency(1250, 350);
+    items.push(emergency);
 
-    const duty_down = new Rectangle(1700, 550, 75, 75, '↓', 'blue');
-    items.push(duty_down);
+    const belt = new Belt(1650, 350);
+    items.push(belt);
 
-    const angle_right = new Rectangle(1775, 475, 75, 75, '→', 'blue');
-    items.push(angle_right);
+    const directionalPadSmall = new DirectionalPad(1700, 550, 75, 75, 1, 5, 'blue');
+    items.push(directionalPadSmall.up);
+    items.push(directionalPadSmall.down);
+    items.push(directionalPadSmall.left);
+    items.push(directionalPadSmall.right);
 
-    const angle_left = new Rectangle(1625, 475, 75, 75, '←', 'blue');
-    items.push(angle_left);
+    const directionalPadLarge = new DirectionalPad(1300, 550, 75, 75, 5, 10, 'cyan');
+    items.push(directionalPadLarge.up);
+    items.push(directionalPadLarge.down);
+    items.push(directionalPadLarge.left);
+    items.push(directionalPadLarge.right);
 
     // オブジェクトを描画する
     items.forEach(item => item.draw(ctx));
 
-
+    ctx.save();
     ctx.font = '48px serif';
-    ctx.fillText('Duty Cycle: 0.4\nAngle :-20 deg', 1100, 800);
+    ctx.fillText('Duty Cycle:', 1100, 800);
+    ctx.fillText('Current Angle:', 1100, 850);
+    ctx.fillText('Target Angle:', 1100, 900);
 
-
-
-    ros.on('error', function(error) {
-        ctx.fillText('Error connecting to websocket server: ' + error, 1100, 900);
+    ros.on('connection', function () {
+        ctx.save();
+        ctx.font = '48px serif';
+        ctx.fillText('Connected to websocket server.', 1100, 950);
+        ctx.restore();
     });
 
+    ros.on('error', function (error) {
+        ctx.save();
+        ctx.font = '48px serif';
+        ctx.fillText('Error connecting to websocket server.', 1100, 950);
+        ctx.restore();
+    });
 
+    ros.on('close', function () {
+        ctx.save();
+        ctx.font = '48px serif';
+        ctx.fillText('Connection to websocket server closed.', 1100, 950);
+        ctx.restore();
+    });
+    ctx.restore();
+
+
+
+    listener.subscribe(function (message) {
+        ctx.save();
+        ctx.font = '48px serif';
+        ctx.clearRect(1400, 750, 200, 50);
+        ctx.fillText(targetDuty, 1400, 800);
+        ctx.restore();
+    });
 
     canvas.addEventListener("click", e => {
         const rect = canvas.getBoundingClientRect();
