@@ -72,9 +72,9 @@ var targetDuty = 0;
 function updateAngle(newAngle, ctx) {
     targetAngle = newAngle;
     ctx.save();
-    ctx.font = '48px serif';
-    ctx.clearRect(1400, 800, 200, 50);
-    ctx.fillText(targetAngle, 1400, 850);
+    ctx.font = '48px "Roboto Mono", sans-serif';
+    ctx.clearRect(1500, 850, 200, 50);
+    ctx.fillText(targetAngle, 1500, 900);
     const angle = new ROSLIB.Message({
         data: targetAngle
     })
@@ -85,9 +85,9 @@ function updateAngle(newAngle, ctx) {
 function updateDuty(newDuty, ctx) {
     targetDuty = newDuty;
     ctx.save();
-    ctx.font = '48px serif';
-    ctx.clearRect(1400, 750, 200, 50);
-    ctx.fillText(targetDuty, 1400, 800);
+    ctx.font = '48px "Roboto Mono", sans-serif';
+    ctx.clearRect(1500, 750, 200, 50);
+    ctx.fillText(targetDuty, 1500, 800);
     const duty = new ROSLIB.Message({
         data: targetDuty
     })
@@ -384,28 +384,28 @@ const main = () => {
     items.forEach(item => item.draw(ctx));
 
     ctx.save();
-    ctx.font = '48px serif';
+    ctx.font = '48px "Roboto Mono", sans-serif';
     ctx.fillText('Duty Cycle:', 1100, 800);
     ctx.fillText('Current Angle:', 1100, 850);
     ctx.fillText('Target Angle:', 1100, 900);
 
     ros.on('connection', function () {
         ctx.save();
-        ctx.font = '48px serif';
+        ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connected to websocket server.', 1100, 950);
         ctx.restore();
     });
 
     ros.on('error', function (error) {
         ctx.save();
-        ctx.font = '48px serif';
+        ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Error connecting to websocket server.', 1100, 950);
         ctx.restore();
     });
 
     ros.on('close', function () {
         ctx.save();
-        ctx.font = '48px serif';
+        ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connection to websocket server closed.', 1100, 950);
         ctx.restore();
     });
@@ -415,9 +415,9 @@ const main = () => {
 
     currentAngle.subscribe(function (message) {
         ctx.save();
-        ctx.font = '48px serif';
-        ctx.clearRect(1400, 750, 200, 50);
-        ctx.fillText(targetDuty, 1400, 800);
+        ctx.clearRect(1500, 800, 200, 50);
+        ctx.font = '48px "Roboto Mono", sans-serif';
+        ctx.fillText(message.data, 1500, 850);
         ctx.restore();
     });
 
