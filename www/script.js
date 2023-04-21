@@ -106,11 +106,14 @@ function updateLidar(state, ctx) {
     cmdToggleLidar.publish(toggle);
 }
 
+function degToRad(deg) {
+    return deg * Math.PI / 180;
+}
 
 
 // canvas
 
-class Rectangle{
+class Rectangle {
     constructor(x, y, w, h, str, color) {
         this.x = x;
         this.y = y;
@@ -150,9 +153,9 @@ PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
 const PoleCoordinates = [];
 PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665], [550, 540], [425, 415], [675, 415], [300, 140], [550, 140], [800, 140]);
 const PoleTargetAngles = [];
-PoleTargetAngles.push(-20, -20, -10, -10, -10, 0, 10, 10, 10, 20, 20);
+PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));
 const PoleTargetDuties = [];
-PoleTargetDuties.push(400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400);
+PoleTargetDuties.push(300, 450, 450, 700, 700, 800, 700, 700, 800, 800, 800);
 
 class Pole extends Rectangle {
     constructor(x, y, no) {
