@@ -57,6 +57,12 @@ const cmdEmergencyStop = new ROSLIB.Topic({
     messageType: 'std_msgs/Bool'
 });
 
+const cmdAim = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_aim',
+    messageType: 'std_msgs/Int16'
+});
+
 const currentAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/current_angle',
@@ -109,6 +115,7 @@ function updateLidar(state, ctx) {
 function degToRad(deg) {
     return deg * Math.PI / 180;
 }
+
 
 
 // canvas
@@ -376,7 +383,7 @@ const main = () => {
 
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.fillText('Duty Cycle:', 1100, 800);
+    ctx.fillText('Duty:', 1100, 800);
     ctx.fillText('Current Angle:', 1100, 850);
     ctx.fillText('Target Angle:', 1100, 900);
 
@@ -436,6 +443,48 @@ const main = () => {
     });
     document.querySelector(`canvas`).addEventListener(`contextmenu`, () => {
         event.preventDefault();
+    });
+    document.addEventListener('keydown', (e) => {
+        let value;
+        switch (e.key) {
+            case 'd':
+                value = 100;
+                break;
+            case 'a':
+                value = -100;
+                break;
+            case 'e':
+                value = 70;
+                break;
+            case 'q':
+                value = -70;
+                break;
+            case 'w':
+                updateDuty(targetDuty + 1, ctx);
+                console.log("update duty");
+                break;
+            case 's':
+                updateDuty(targetDuty - 1, ctx);
+                break;
+        }
+        const duty = new ROSLIB.Message({
+            data: value
+        });
+        cmdAim.publish(duty);
+        console.log('Aiming duty :' + duty);
+    });
+    document.addEventListener('keyup', (e) => {
+        switch (e.key) {
+            case 'd':
+            case 'a':
+            case 'e':
+            case 'q':
+                const duty = new ROSLIB.Message({
+                    data: 0
+                });
+                cmdAim.publish(duty);
+                console.log('Aiming duty :' + duty);
+        }
     });
 };
 
