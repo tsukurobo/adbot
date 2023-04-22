@@ -1,10 +1,19 @@
 <launch>
-<arg name="port" default="8085"/> <!-- avoid to use apache default port -->
-<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
-<arg name="use_roswww" default="true" />
-<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
-<include if="$(arg use_roswww)" file="$(find roswww)/launch/roswww.launch">
-  <arg name="port" value="$(arg port)"/>
-  <arg name="webpath" value="$(arg webpath)"/>
-</include>
+	<arg name="port" default="8085"/> <!-- avoid to use apache default port -->
+	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
+	<arg name="use_roswww" default="true" />
+	<arg name="arduino" default="true"/>
+
+	<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+	<include if="$(arg use_roswww)" file="$(find roswww)/launch/roswww.launch">
+  	<arg name="port" value="$(arg port)"/>
+  	<arg name="webpath" value="$(arg webpath)"/>
+	</include>
+
+	<group if="$(arg arduino)">
+		<node name="aruduino" pkg="rosserial_arduino" type="serial_node.py" required="true">
+			<param name="port" value="/dev/ttyACM0"/>
+			<param name="baud" value="2000000"/>
+		</node>
+	</group>
 </launch>

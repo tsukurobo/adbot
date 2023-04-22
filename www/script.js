@@ -70,7 +70,7 @@ function updateAngle(newAngle, ctx) {
     targetAngle = newAngle;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.clearRect(1500, 850, 200, 50);
+    ctx.clearRect(1500, 850, 420, 50);
     ctx.fillText(targetAngle, 1500, 900);
     const angle = new ROSLIB.Message({
         data: targetAngle
@@ -83,7 +83,7 @@ function updateDuty(newDuty, ctx) {
     targetDuty = newDuty;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.clearRect(1500, 750, 200, 50);
+    ctx.clearRect(1500, 750, 420, 50);
     ctx.fillText(targetDuty, 1500, 800);
     const duty = new ROSLIB.Message({
         data: targetDuty
@@ -289,7 +289,7 @@ class DutyAdjustor extends Rectangle {
 class AngleAdjustor extends Rectangle {
     constructor(x, y, w, h, diff, color) {
         super(x, y, w, h, diff >= 0 ? '→' : '←', color);
-        this.diff = diff;
+        this.diff = degToRad(diff);
     }
 
     onClick(ctx) {
@@ -373,6 +373,7 @@ const main = () => {
 
     ros.on('connection', function () {
         ctx.save();
+        ctx.clearRect(1100, 900, 820, 50);
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connected to websocket server.', 1100, 950);
         ctx.restore();
@@ -380,6 +381,7 @@ const main = () => {
 
     ros.on('error', function (error) {
         ctx.save();
+        ctx.clearRect(1100, 900, 820, 50);
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Error connecting to websocket server.', 1100, 950);
         ctx.restore();
@@ -387,6 +389,7 @@ const main = () => {
 
     ros.on('close', function () {
         ctx.save();
+        ctx.clearRect(1100, 900, 820, 50);
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connection to websocket server closed.', 1100, 950);
         ctx.restore();
@@ -397,7 +400,7 @@ const main = () => {
 
     currentAngle.subscribe(function (message) {
         ctx.save();
-        ctx.clearRect(1500, 800, 200, 50);
+        ctx.clearRect(1500, 800, 420, 50);
         ctx.font = '48px "Roboto Mono", sans-serif';
         ctx.fillText(message.data, 1500, 850);
         ctx.restore();
