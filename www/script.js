@@ -65,7 +65,7 @@ const cmdAim = new ROSLIB.Topic({
 
 const currentAngle = new ROSLIB.Topic({
     ros: ros,
-    name: '/current_angle',
+    name: '/angle',
     messageType: 'std_msgs/Float64'
 });
 
@@ -448,16 +448,16 @@ const main = () => {
         let value;
         switch (e.key) {
             case 'd':
-                value = 100;
+                value = 130;
                 break;
             case 'a':
-                value = -100;
+                value = -130;
                 break;
             case 'e':
-                value = 70;
+                value = 80;
                 break;
             case 'q':
-                value = -70;
+                value = -80;
                 break;
             case 'w':
                 updateDuty(targetDuty + 1, ctx);
