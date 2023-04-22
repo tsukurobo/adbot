@@ -214,7 +214,7 @@ class Emergency extends Rectangle {
         const toggle = new ROSLIB.Message({
             data: true
         })
-        cmdToggleEmergency.publish(toggle);
+        cmdEmergencyStop.publish(toggle);
     }
 }
 
