@@ -188,20 +188,20 @@ class Shoot extends Rectangle {
 }
 
 class Receive extends Rectangle {
-    constructor(x, y) {
-        super(x, y, 300, 100, 'Receive', 'blue');
+    constructor(x, y, direction) {
+        super(x, y, 130, 100, 'Receive', 'blue');
+        this.direction = direction;
     }
 
     onClick(ctx) {
         super.onClick(ctx);
         console.info("Receiving");
         const toggle = new ROSLIB.Message({
-            data: true
+            data: this.direction
         })
         cmdToggleReceive.publish(toggle);
     }
 }
-
 
 class Emergency extends Rectangle {
     constructor(x, y) {
@@ -332,31 +332,40 @@ const main = () => {
         items.push(pole);
     }
     // Other control objects
-    const shoot = new Shoot(1250, 200);
+    const shoot = new Shoot(1250, 250);
     items.push(shoot);
 
-    const receive = new Receive(1650, 200);
-    items.push(receive);
+    const receive_right = new Receive(1740, 250, true);
+    items.push(receive_right);
 
-    const emergency = new Emergency(1250, 350);
+    const receive_left = new Receive(1560, 250, false);
+    items.push(receive_left);
+
+    const emergency = new Emergency(1250, 400);
     items.push(emergency);
 
-    const belt = new Belt(1650, 350);
+    const belt = new Belt(1650, 400);
     items.push(belt);
 
-    const fullScreen = new FullScreen(1250, 50);
+    const fullScreen = new FullScreen(1250, 100);
     items.push(fullScreen);
 
-    const lidar = new Lidar(1650, 50);
-    items.push(lidar);
+    const lidar = new Lidar(1650, 100);
+    // items.push(lidar);
 
-    const directionalPadSmall = new DirectionalPad(1700, 550, 75, 75, 1, 5, 'blue');
+    const directionalPadSmall = new DirectionalPad(1700, 600, 75, 75, 1, 5, 'blue');
     items.push(directionalPadSmall.up);
     items.push(directionalPadSmall.down);
     items.push(directionalPadSmall.left);
     items.push(directionalPadSmall.right);
 
-    const directionalPadLarge = new DirectionalPad(1300, 550, 75, 75, 5, 10, 'cyan');
+    const directionalPadRegular = new DirectionalPad(1450, 600, 75, 75, 5, 10, 'cyan');
+    items.push(directionalPadRegular.up);
+    items.push(directionalPadRegular.down);
+    items.push(directionalPadRegular.left);
+    items.push(directionalPadRegular.right);
+
+    const directionalPadLarge = new DirectionalPad(1200, 600, 75, 75, 10, 20, 'pink');
     items.push(directionalPadLarge.up);
     items.push(directionalPadLarge.down);
     items.push(directionalPadLarge.left);
@@ -374,6 +383,7 @@ const main = () => {
     ros.on('connection', function () {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 50);
+        ctx.fillStyle = "black";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connected to websocket server.', 1100, 950);
         ctx.restore();
@@ -382,6 +392,7 @@ const main = () => {
     ros.on('error', function (error) {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 50);
+        ctx.fillStyle = "red";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Error connecting to websocket server.', 1100, 950);
         ctx.restore();
@@ -390,6 +401,7 @@ const main = () => {
     ros.on('close', function () {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 50);
+        ctx.fillStyle = "red";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connection to websocket server closed.', 1100, 950);
         ctx.restore();
