@@ -220,7 +220,7 @@ class Emergency extends Rectangle {
     constructor(x, y) {
         super(x, y, 300, 100, 'Emergency', 'gray');
     }
-ffff
+
     onClick(ctx) {
         super.onClick(ctx);
         console.info("Emergency stop");
@@ -319,6 +319,31 @@ class AngleAdjustor extends Rectangle {
     }
 }
 
+class AimControllerByTouch extends Rectangle {
+    constructor(x, y, w, h, duty, color) {
+        super(x, y, w, h, duty >= 0 ? '→' : '←', color);
+        this.duty = duty;
+    }
+
+    onTouch(ctx) {
+        this.draw(ctx, 'red');
+        const duty = new ROSLIB.Message({
+            data: this.duty
+        });
+        cmdAim.publish(duty);
+        console.log("Aiming duty:" + this.duty);
+    }
+
+    onRelease(ctx) {
+        this.draw(ctx, this.color);
+        const duty = new ROSLIB.Message({
+            data: 0
+        });
+        cmdAim.publish(duty);
+        console.log("Aiming duty:" + 0);
+    }
+}
+
 class DirectionalPad {
     constructor(x, y, buttonWidth, buttonHeight, angleDiff, dutyDiff, color) {
         this.x = x;
@@ -342,6 +367,7 @@ const main = () => {
     ctx.restore();
 
     const items = [];
+    const touchItems = [];
 
     // Create objects in the game field
     const poles = [];
@@ -390,8 +416,14 @@ const main = () => {
     items.push(directionalPadLarge.left);
     items.push(directionalPadLarge.right);
 
+    const aimControllerByTouchRight = new AimControllerByTouch(1800, 100, 100, 100, 130, 'blue');
+    touchItems.push(aimControllerByTouchRight);
+    const aimControllerByTouchLeft = new AimControllerByTouch(1650, 100, 100, 100, -130, 'blue');
+    touchItems.push(aimControllerByTouchLeft);
+
     // オブジェクトを描画する
     items.forEach(item => item.draw(ctx));
+    touchItems.forEach(item => item.draw(ctx));
 
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
@@ -453,6 +485,28 @@ const main = () => {
             }
         });
     });
+    canvas.addEventListener("touchstart", e => {
+        const rect = canvas.getBoundingClientRect();
+        scaleX = canvas.width / rect.width;
+        scaleY = canvas.height / rect.height;
+
+        const point = {
+            x: (e.touches[0].clientX - rect.left) * scaleX,
+            y: (e.touches[0].clientY - rect.top) * scaleY
+        };
+
+        touchItems.forEach(item => {
+            if (item.checkIfClicked(point)) {
+                item.onTouch(ctx);
+            }
+        });
+    });
+    canvas.addEventListener("touchend", e => {
+        touchItems.forEach(item => {
+            item.onRelease(ctx);
+        });
+    });
+
     document.querySelector(`canvas`).addEventListener(`contextmenu`, () => {
         event.preventDefault();
     });
