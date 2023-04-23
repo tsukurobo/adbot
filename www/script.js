@@ -160,9 +160,9 @@ PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
 const PoleCoordinates = [];
 PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665], [550, 540], [425, 415], [675, 415], [300, 140], [550, 140], [800, 140]);
 const PoleTargetAngles = [];
-PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));
+PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));//パラメータ：各ポールのプリセットangle
 const PoleTargetDuties = [];
-PoleTargetDuties.push(300, 450, 450, 700, 700, 800, 700, 700, 800, 800, 800);
+PoleTargetDuties.push(450, 350, 450, 800, 800, 800, 700, 700, 800, 800, 800); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
 
 class Pole extends Rectangle {
     constructor(x, y, no) {
@@ -214,7 +214,7 @@ class Emergency extends Rectangle {
     constructor(x, y) {
         super(x, y, 300, 100, 'Emergency', 'gray');
     }
-
+ffff
     onClick(ctx) {
         super.onClick(ctx);
         console.info("Emergency stop");
@@ -446,7 +446,7 @@ const main = () => {
     });
     document.addEventListener('keydown', (e) => {
         let value;
-        switch (e.key) {
+        switch (e.key) {//パラメータ；キーボード動作の値
             case 'd':
                 value = 130;
                 break;
