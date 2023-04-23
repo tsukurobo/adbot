@@ -168,7 +168,7 @@ PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665],
 const PoleTargetAngles = [];
 PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));//パラメータ：各ポールのプリセットangle
 const PoleTargetDuties = [];
-PoleTargetDuties.push(470, 350, 470, 490, 490, 610, 610, 610, 610, 610, 610); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
+PoleTargetDuties.push(470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
 
 class Pole extends Rectangle {
     constructor(x, y, no) {
