@@ -351,8 +351,8 @@ class DirectionalPad {
         this.color = color;
         this.up = new DutyAdjustor(x, y - buttonHeight, buttonWidth, buttonHeight, dutyDiff, color);
         this.down = new DutyAdjustor(x, y + buttonHeight, buttonWidth, buttonHeight, -dutyDiff, color);
-        this.left = new AngleAdjustor(x - buttonWidth, y, buttonWidth, buttonHeight, -angleDiff, color);
-        this.right = new AngleAdjustor(x + buttonWidth, y, buttonWidth, buttonHeight, angleDiff, color);
+        // this.left = new AngleAdjustor(x - buttonWidth, y, buttonWidth, buttonHeight, -angleDiff, color);
+        // this.right = new AngleAdjustor(x + buttonWidth, y, buttonWidth, buttonHeight, angleDiff, color);
     }
 }
 
@@ -398,23 +398,23 @@ const main = () => {
     const lidar = new Lidar(1650, 100);
     // items.push(lidar);
 
-    const directionalPadSmall = new DirectionalPad(1700, 600, 75, 75, 1, 5, 'blue');
+    const directionalPadSmall = new DirectionalPad(1450, 600, 75, 75, 1, 5, 'blue');
     items.push(directionalPadSmall.up);
     items.push(directionalPadSmall.down);
-    items.push(directionalPadSmall.left);
-    items.push(directionalPadSmall.right);
+    // items.push(directionalPadSmall.left);
+    // items.push(directionalPadSmall.right);
 
-    const directionalPadRegular = new DirectionalPad(1450, 600, 75, 75, 2, 10, 'cyan');
+    const directionalPadRegular = new DirectionalPad(1300, 600, 75, 75, 2, 10, 'cyan');
     items.push(directionalPadRegular.up);
     items.push(directionalPadRegular.down);
-    items.push(directionalPadRegular.left);
-    items.push(directionalPadRegular.right);
+    // items.push(directionalPadRegular.left);
+    // items.push(directionalPadRegular.right);
 
-    const directionalPadLarge = new DirectionalPad(1200, 600, 75, 75, 3, 20, 'pink');
+    const directionalPadLarge = new DirectionalPad(1150, 600, 75, 75, 3, 20, 'pink');
     items.push(directionalPadLarge.up);
     items.push(directionalPadLarge.down);
-    items.push(directionalPadLarge.left);
-    items.push(directionalPadLarge.right);
+    // items.push(directionalPadLarge.left);
+    // items.push(directionalPadLarge.right);
 
     const aimControllerByTouchRight = new AimControllerByTouch(1800, 100, 100, 100, 130, 'blue');
     touchItems.push(aimControllerByTouchRight);
