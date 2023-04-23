@@ -270,6 +270,7 @@ class Lidar extends StatusButton {
     }
 }
 
+
 class FullScreen extends StatusButton {
     constructor(x, y) {
         super(x, y, 300, 100, 'Full Screen', 'blue', 'green');
@@ -297,6 +298,19 @@ class DutyAdjustor extends Rectangle {
         targetDuty += this.diff;
         updateDuty(targetDuty, ctx);
     }
+}
+class StopDuty extends Rectangle{
+    constructor(x, y, w, h, color) {
+        super(x, y, w, h, 'Stop', color);
+    }
+
+    onClick(ctx) {
+        super.onClick(ctx);
+        console.info("Adjusting Duty to " + targetDuty);
+        targetDuty = 0;
+        updateDuty(targetDuty, ctx);
+    }
+
 }
 
 class AngleAdjustor extends Rectangle {
@@ -381,10 +395,10 @@ const main = () => {
     items.push(shoot);
 
     const receive_right = new Receive(1740, 250, true);
-    items.push(receive_right);
+    // items.push(receive_right);
 
     const receive_left = new Receive(1560, 250, false);
-    items.push(receive_left);
+    // items.push(receive_left);
 
     const emergency = new Emergency(1250, 400);
     items.push(emergency);
@@ -416,12 +430,15 @@ const main = () => {
     // items.push(directionalPadLarge.left);
     // items.push(directionalPadLarge.right);
 
-    const aimControllerByTouchRight = new AimControllerByTouch(1800, 100, 100, 100, 130, 'blue');
+    const aimControllerByTouchRight = new AimControllerByTouch(1750, 550, 100, 100, 130, 'blue');
     touchItems.push(aimControllerByTouchRight);
-    const aimControllerByTouchLeft = new AimControllerByTouch(1650, 100, 100, 100, -130, 'blue');
+    const aimControllerByTouchLeft = new AimControllerByTouch(1600, 550, 100, 100, -130, 'blue');
     touchItems.push(aimControllerByTouchLeft);
 
-    // オブジェクトを描画する
+    const stopShooting = new StopDuty(1670, 670, 300, 100, 0, 'gray');
+    items.push(stopShooting);
+
+    // draw objects
     items.forEach(item => item.draw(ctx));
     touchItems.forEach(item => item.draw(ctx));
 
@@ -433,7 +450,7 @@ const main = () => {
 
     ros.on('connection', function () {
         ctx.save();
-        ctx.clearRect(1100, 900, 820, 50);
+        ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "black";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connected to websocket server.', 1100, 950);
@@ -442,7 +459,7 @@ const main = () => {
 
     ros.on('error', function (error) {
         ctx.save();
-        ctx.clearRect(1100, 900, 820, 50);
+        ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "red";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Error connecting to websocket server.', 1100, 950);
@@ -451,7 +468,7 @@ const main = () => {
 
     ros.on('close', function () {
         ctx.save();
-        ctx.clearRect(1100, 900, 820, 50);
+        ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "red";
         ctx.font = '48px "Roboto", sans-serif';
         ctx.fillText('Connection to websocket server closed.', 1100, 950);
