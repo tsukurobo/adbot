@@ -485,14 +485,14 @@ const main = () => {
             }
         });
     });
-    canvas.addEventListener("touchstart", e => {
+    canvas.addEventListener("mousedown", e => {
         const rect = canvas.getBoundingClientRect();
         scaleX = canvas.width / rect.width;
         scaleY = canvas.height / rect.height;
 
         const point = {
-            x: (e.touches[0].clientX - rect.left) * scaleX,
-            y: (e.touches[0].clientY - rect.top) * scaleY
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
         };
 
         touchItems.forEach(item => {
@@ -501,7 +501,7 @@ const main = () => {
             }
         });
     });
-    canvas.addEventListener("touchend", e => {
+    canvas.addEventListener("mouseup", e => {
         touchItems.forEach(item => {
             item.onRelease(ctx);
         });
