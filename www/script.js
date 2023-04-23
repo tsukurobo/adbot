@@ -21,6 +21,12 @@ const cmdAngle = new ROSLIB.Topic({
     messageType: 'std_msgs/Float64'
 });
 
+const cmdAngleAdjust = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_angle_adjust',
+    messageType: 'std_msgs/Int16'
+});
+
 const cmdDuty = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_shooting_duty',
@@ -296,14 +302,20 @@ class DutyAdjustor extends Rectangle {
 class AngleAdjustor extends Rectangle {
     constructor(x, y, w, h, diff, color) {
         super(x, y, w, h, diff >= 0 ? '→' : '←', color);
-        this.diff = degToRad(diff);
+        // this.diff = degToRad(diff);
+        this.diff = diff;
     }
 
     onClick(ctx) {
         super.onClick(ctx);
-        console.info("Adjusting Angle to " + targetAngle);
-        targetAngle += this.diff;
-        updateAngle(targetAngle, ctx);
+        // console.info("Adjusting Angle to " + targetAngle);
+        // targetAngle += this.diff;
+        // updateAngle(targetAngle, ctx);
+        const angleAdjust = new ROSLIB.Message({
+            data: this.diff
+        })
+        cmdAngleAdjust.publish(angleAdjust);
+        console.log("Adjusting Angle:" + this.diff);
     }
 }
 
@@ -366,13 +378,13 @@ const main = () => {
     items.push(directionalPadSmall.left);
     items.push(directionalPadSmall.right);
 
-    const directionalPadRegular = new DirectionalPad(1450, 600, 75, 75, 5, 10, 'cyan');
+    const directionalPadRegular = new DirectionalPad(1450, 600, 75, 75, 2, 10, 'cyan');
     items.push(directionalPadRegular.up);
     items.push(directionalPadRegular.down);
     items.push(directionalPadRegular.left);
     items.push(directionalPadRegular.right);
 
-    const directionalPadLarge = new DirectionalPad(1200, 600, 75, 75, 10, 20, 'pink');
+    const directionalPadLarge = new DirectionalPad(1200, 600, 75, 75, 3, 20, 'pink');
     items.push(directionalPadLarge.up);
     items.push(directionalPadLarge.down);
     items.push(directionalPadLarge.left);
