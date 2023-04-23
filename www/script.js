@@ -82,8 +82,8 @@ function updateAngle(newAngle, ctx) {
     targetAngle = newAngle;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.clearRect(1500, 850, 420, 50);
-    ctx.fillText(targetAngle, 1500, 900);
+    // ctx.clearRect(1500, 850, 420, 50);
+    // ctx.fillText(targetAngle, 1500, 900);
     const angle = new ROSLIB.Message({
         data: targetAngle
     })
@@ -95,8 +95,8 @@ function updateDuty(newDuty, ctx) {
     targetDuty = newDuty;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.clearRect(1500, 750, 420, 50);
-    ctx.fillText(targetDuty, 1500, 800);
+    ctx.clearRect(1250, 750, 220, 50);
+    ctx.fillText(targetDuty, 1250, 800);
     const duty = new ROSLIB.Message({
         data: targetDuty
     })
@@ -445,8 +445,8 @@ const main = () => {
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
     ctx.fillText('Duty:', 1100, 800);
-    ctx.fillText('Current Angle:', 1100, 850);
-    ctx.fillText('Target Angle:', 1100, 900);
+    // ctx.fillText('Current Angle:', 1100, 850);
+    // ctx.fillText('Target Angle:', 1100, 900);
 
     ros.on('connection', function () {
         ctx.save();
