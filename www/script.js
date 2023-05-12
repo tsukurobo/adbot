@@ -15,6 +15,7 @@ ros.on('close', function () {
     console.log('Connection to websocket server closed.');
 });
 
+// Publishers
 const cmdAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_angle',
@@ -53,7 +54,7 @@ const cmdToggleBelt = new ROSLIB.Topic({
 
 const cmdToggleLidar = new ROSLIB.Topic({
     ros: ros,
-    name: '/cmd_toggle_lidar',
+    name: '/cmd_toggle_Lidar',
     messageType: 'std_msgs/Bool'
 });
 
@@ -69,11 +70,26 @@ const cmdAim = new ROSLIB.Topic({
     messageType: 'std_msgs/Int16'
 });
 
+// Subscribers
 const currentAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/angle',
     messageType: 'std_msgs/Float64'
 });
+
+const distanceToPole = new ROSLIB.Topic({
+    ros: ros,
+    name: '/distance_to_pole',
+    messageType: 'std_msgs/Float64'
+});
+
+const errorAngle = new ROSLIB.Topic({
+    ros: ros,
+    name: '/error_angle',
+    messageType: 'std_msgs/Float64'
+});
+
+
 
 var targetAngle = 0;
 var targetDuty = 0;
@@ -202,7 +218,7 @@ class Shoot extends Rectangle {
 
 class Receive extends Rectangle {
     constructor(x, y, direction) {
-        super(x, y, 130, 100, 'Receive', 'blue');
+        super(x, y, 130, 100, 'Rec\'', 'blue');
         this.direction = direction;
     }
 
@@ -299,7 +315,7 @@ class DutyAdjustor extends Rectangle {
         updateDuty(targetDuty, ctx);
     }
 }
-class StopDuty extends Rectangle{
+class StopDuty extends Rectangle {
     constructor(x, y, w, h, color) {
         super(x, y, w, h, 'Stop', color);
     }
@@ -395,10 +411,10 @@ const main = () => {
     items.push(shoot);
 
     const receive_right = new Receive(1740, 250, true);
-    // items.push(receive_right);
+    items.push(receive_right);
 
     const receive_left = new Receive(1560, 250, false);
-    // items.push(receive_left);
+    items.push(receive_left);
 
     const emergency = new Emergency(1250, 400);
     items.push(emergency);
@@ -410,7 +426,7 @@ const main = () => {
     items.push(fullScreen);
 
     const lidar = new Lidar(1650, 100);
-    // items.push(lidar);
+    items.push(lidar);
 
     const directionalPadSmall = new DirectionalPad(1450, 600, 75, 75, 1, 5, 'blue');
     items.push(directionalPadSmall.up);
@@ -443,17 +459,19 @@ const main = () => {
     touchItems.forEach(item => item.draw(ctx));
 
     ctx.save();
-    ctx.font = '48px "Roboto Mono", sans-serif';
+    ctx.font = '48px "Roboto Mono", "Noto Sans JP", sans-serif';
     ctx.fillText('Duty:', 1100, 800);
     // ctx.fillText('Current Angle:', 1100, 850);
     // ctx.fillText('Target Angle:', 1100, 900);
+    ctx.fillText('ポールの距離:', 1100, 850);
+    ctx.fillText('ポールのずれ:', 1100, 900);
 
     ros.on('connection', function () {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "black";
-        ctx.font = '48px "Roboto", sans-serif';
-        ctx.fillText('Connected to websocket server.', 1100, 950);
+        ctx.font = '48px "Roboto", "Noto Sans JP", sans-serif';
+        ctx.fillText('接続成功', 1100, 950);
         ctx.restore();
     });
 
@@ -461,8 +479,8 @@ const main = () => {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "red";
-        ctx.font = '48px "Roboto", sans-serif';
-        ctx.fillText('Error connecting to websocket server.', 1100, 950);
+        ctx.font = '48px "Roboto", "Noto Sans JP", sans-serif';
+        ctx.fillText('接続失敗', 1100, 950);
         ctx.restore();
     });
 
@@ -470,8 +488,8 @@ const main = () => {
         ctx.save();
         ctx.clearRect(1100, 900, 820, 60);
         ctx.fillStyle = "red";
-        ctx.font = '48px "Roboto", sans-serif';
-        ctx.fillText('Connection to websocket server closed.', 1100, 950);
+        ctx.font = '48px "Roboto","Noto Sans JP", sans-serif';
+        ctx.fillText('接続終了', 1100, 950);
         ctx.restore();
     });
     ctx.restore();
@@ -480,9 +498,26 @@ const main = () => {
 
     currentAngle.subscribe(function (message) {
         ctx.save();
+        ctx.clearRect(1700, 1000, 420, 50);
+        ctx.font = '48px "Roboto Mono", sans-serif';
+        ctx.fillText(message.data, 1700, 1050);
+        ctx.restore();
+        console.log(message.data);
+    });
+
+    distanceToPole.subscribe(function (message) {
+        ctx.save();
         ctx.clearRect(1500, 800, 420, 50);
         ctx.font = '48px "Roboto Mono", sans-serif';
         ctx.fillText(message.data, 1500, 850);
+        ctx.restore();
+    });
+
+    errorAngle.subscribe(function (message) {
+        ctx.save();
+        ctx.clearRect(1500, 850, 420, 50);
+        ctx.font = '48px "Roboto Mono", sans-serif';
+        ctx.fillText(message.data, 1500, 900);
         ctx.restore();
     });
 
@@ -520,7 +555,7 @@ const main = () => {
     });
     canvas.addEventListener("mouseup", e => {
         touchItems.forEach(item => {
-            item.onRelease(ctx);
+            // item.onRelease(ctx);
         });
     });
 
