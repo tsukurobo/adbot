@@ -335,31 +335,6 @@ class StopDuty extends Rectangle {
 
 }
 
-class AimControllerByTouch extends Rectangle {
-    constructor(x, y, w, h, duty, color) {
-        super(x, y, w, h, duty >= 0 ? '→' : '←', color);
-        this.duty = duty;
-    }
-
-    onTouch(ctx) {
-        this.draw(ctx, 'red');
-        const duty = new ROSLIB.Message({
-            data: this.duty
-        });
-        cmdAim.publish(duty);
-        console.log("Aiming duty:" + this.duty);
-    }
-
-    onRelease(ctx) {
-        this.draw(ctx, this.color);
-        const duty = new ROSLIB.Message({
-            data: 0
-        });
-        cmdAim.publish(duty);
-        console.log("Aiming duty:" + 0);
-    }
-}
-
 class DirectionalPad {
     constructor(x, y, buttonWidth, buttonHeight, angleDiff, dutyDiff, color) {
         this.x = x;
@@ -398,7 +373,6 @@ const main = () => {
     ctx.restore();
 
     const items = [];
-    const touchItems = [];
 
     // Create objects in the game field
     const poles = [];
@@ -432,32 +406,20 @@ const main = () => {
     const directionalPadSmall = new DirectionalPad(1450, 600, 75, 75, 1, 5, 'blue');
     items.push(directionalPadSmall.up);
     items.push(directionalPadSmall.down);
-    // items.push(directionalPadSmall.left);
-    // items.push(directionalPadSmall.right);
 
     const directionalPadRegular = new DirectionalPad(1300, 600, 75, 75, 2, 10, 'cyan');
     items.push(directionalPadRegular.up);
     items.push(directionalPadRegular.down);
-    // items.push(directionalPadRegular.left);
-    // items.push(directionalPadRegular.right);
 
     const directionalPadLarge = new DirectionalPad(1150, 600, 75, 75, 3, 20, 'pink');
     items.push(directionalPadLarge.up);
     items.push(directionalPadLarge.down);
-    // items.push(directionalPadLarge.left);
-    // items.push(directionalPadLarge.right);
-
-    // const aimControllerByTouchRight = new AimControllerByTouch(1750, 550, 100, 100, 130, 'blue');
-    // touchItems.push(aimControllerByTouchRight);
-    // const aimControllerByTouchLeft = new AimControllerByTouch(1600, 550, 100, 100, -130, 'blue');
-    // touchItems.push(aimControllerByTouchLeft);
 
     const stopShooting = new StopDuty(1670, 670, 300, 100, 0, 'gray');
     items.push(stopShooting);
 
     // draw objects
     items.forEach(item => item.draw(ctx));
-    touchItems.forEach(item => item.draw(ctx));
 
     ctx.save();
     ctx.font = '48px "Roboto Mono", "Noto Sans JP", sans-serif';
@@ -522,28 +484,6 @@ const main = () => {
             }
         });
     });
-    canvas.addEventListener("mousedown", e => {
-        const rect = canvas.getBoundingClientRect();
-        scaleX = canvas.width / rect.width;
-        scaleY = canvas.height / rect.height;
-
-        const point = {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY
-        };
-
-        touchItems.forEach(item => {
-            if (item.checkIfClicked(point)) {
-                item.onTouch(ctx);
-            }
-        });
-    });
-    canvas.addEventListener("mouseup", e => {
-        touchItems.forEach(item => {
-            // item.onRelease(ctx);
-        });
-    });
-
     document.querySelector(`canvas`).addEventListener(`contextmenu`, () => {
         event.preventDefault();
     });
