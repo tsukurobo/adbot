@@ -168,6 +168,7 @@ PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), d
 const PoleTargetDuties = [];
 PoleTargetDuties.push(470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
 
+
 class Pole extends Rectangle {
     constructor(x, y, no) {
         super(x, y, 125, 125, PoleTypes[no], "black");
@@ -211,17 +212,15 @@ class Shoot extends Rectangle {
 
 class Receive extends Rectangle {
     constructor(x, y, direction) {
-        super(x, y, 130, 100, 'Rec\'', 'blue');
+        super(x, y, 130, 100, '受取', 'blue');
         this.direction = direction;
     }
 
     onClick(ctx) {
         super.onClick(ctx);
-        console.info("Receiving");
-        const toggle = new ROSLIB.Message({
-            data: this.direction
-        })
-        cmdToggleReceive.publish(toggle);
+        console.info("Receive in " + (this.direction ? "Right" : "Left"));
+        targetAngle = this.direction ? degToRad(-90) : degToRad(90);
+        updateAngle(targetAngle, ctx);
     }
 }
 
