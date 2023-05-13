@@ -166,7 +166,7 @@ PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 740], [675, 740],
 const PoleTargetAngles = [];
 PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));//パラメータ：各ポールのプリセットangle
 const PoleTargetDuties = [];
-PoleTargetDuties.push(470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
+// PoleTargetDuties.push(470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620); //パラメータ：各ポールのプリセットduty。自陣Type1左, 中, 右, 自陣Type2左, 右, Type3, 敵陣Type2左, 右, 敵陣Type1左, 中, 右
 
 
 class Pole extends Rectangle {
@@ -328,7 +328,7 @@ class DirectionalPad {
         this.color = color;
         this.up = new DutyAdjustor(x, y - buttonHeight, buttonWidth, buttonHeight, dutyDiff, color);
         this.down = new DutyAdjustor(x, y + buttonHeight, buttonWidth, buttonHeight, -dutyDiff, color);
-     }
+    }
 }
 
 class ConnectionStatusDisplay {
@@ -348,11 +348,26 @@ class ConnectionStatusDisplay {
         ctx.restore();
     }
 }
+
+
+const poleDuty = new ROSLIB.Param({
+    ros: ros,
+    name: 'pole/duty'
+});
+
 const main = () => {
     const canvas = document.getElementById("canvas");
 
     canvas.width = 1920;
     canvas.height = 1080;
+
+    // Get params from rosparam server
+    poleDuty.get(function (value) {
+        for (let i = 0; i < 11; i++) {
+            PoleTargetDuties.push(value[i]);
+            console.log("Pole " + i + " set to " + PoleTargetDuties[i]);
+        }
+    });
 
     const ctx = canvas.getContext("2d");
     ctx.save();
@@ -427,6 +442,9 @@ const main = () => {
         connectionStatusDisplay.draw(ctx, 'red', '接続終了');
     });
 
+    ros.getParams(function (params) {
+        console.log(params);
+    });
 
 
     currentAngle.subscribe(function (message) {
