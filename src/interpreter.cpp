@@ -18,6 +18,6 @@ int main(int argc, char **argv ){
     ros::NodeHandle nh;
     cmdToggleShootPub = nh.advertise<std_msgs::Bool>("cmd_toggle_shoot", 10);
 
-    sub = nh.subscribe("joy", 10, joyCallBack)
+    // sub = nh.subscribe("joy", 10, joyCallBack)
     return 0;
 }

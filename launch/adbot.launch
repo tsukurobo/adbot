@@ -1,4 +1,6 @@
 <launch>
+	<rosparam command="load" file="$(find adbot)/config/params.yaml" />
+
 	<arg name="port" default="8085"/> <!-- avoid to use apache default port -->
 	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
 	<arg name="use_roswww" default="true" />
