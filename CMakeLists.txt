@@ -208,5 +208,5 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(talker src/interpreter.cpp)
-target_link_libraries(talker ${catkin_LIBRARIES})
+add_executable(interpreter src/interpreter.cpp)
+target_link_libraries(interpreter ${catkin_LIBRARIES})
