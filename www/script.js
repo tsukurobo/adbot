@@ -321,8 +321,8 @@ class DutyAdjustor extends Rectangle {
 
     onClick(ctx) {
         super.onClick(ctx);
-        console.info("Adjusting Duty to " + targetDuty);
         targetDuty += this.diff;
+        console.info("Adjusting Duty to " + targetDuty);
         updateDuty(targetDuty, ctx);
     }
 }
@@ -333,8 +333,8 @@ class StopDuty extends Rectangle {
 
     onClick(ctx) {
         super.onClick(ctx);
-        console.info("Adjusting Duty to " + targetDuty);
         targetDuty = 0;
+        console.info("Adjusting Duty to " + targetDuty);
         updateDuty(targetDuty, ctx);
     }
 
