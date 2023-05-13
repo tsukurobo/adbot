@@ -106,7 +106,7 @@ function updateDuty(newDuty, ctx) {
     targetDuty = newDuty;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    ctx.clearRect(1250, 750, 220, 50);
+    ctx.clearRect(1250, 750, 220, 60);
     ctx.fillText(targetDuty, 1250, 800);
     const duty = new ROSLIB.Message({
         data: targetDuty
@@ -546,48 +546,6 @@ const main = () => {
 
     document.querySelector(`canvas`).addEventListener(`contextmenu`, () => {
         event.preventDefault();
-    });
-    document.addEventListener('keydown', (e) => {
-        let value;
-        switch (e.key) {//パラメータ；キーボード動作の値
-            case 'd':
-                value = 130;
-                break;
-            case 'a':
-                value = -130;
-                break;
-            case 'e':
-                value = 80;
-                break;
-            case 'q':
-                value = -80;
-                break;
-            case 'w':
-                updateDuty(targetDuty + 1, ctx);
-                console.log("update duty");
-                break;
-            case 's':
-                updateDuty(targetDuty - 1, ctx);
-                break;
-        }
-        const duty = new ROSLIB.Message({
-            data: value
-        });
-        cmdAim.publish(duty);
-        console.log('Aiming duty :' + duty);
-    });
-    document.addEventListener('keyup', (e) => {
-        switch (e.key) {
-            case 'd':
-            case 'a':
-            case 'e':
-            case 'q':
-                const duty = new ROSLIB.Message({
-                    data: 0
-                });
-                cmdAim.publish(duty);
-                console.log('Aiming duty :' + duty);
-        }
     });
 };
 
