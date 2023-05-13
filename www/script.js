@@ -15,7 +15,7 @@ ros.on('close', function () {
     console.log('Connection to websocket server closed.');
 });
 
-// Publishers
+// Define topics
 const cmdAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_angle',
@@ -32,12 +32,6 @@ const cmdDuty = new ROSLIB.Topic({
 const cmdToggleShoot = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_toggle_shoot',
-    messageType: 'std_msgs/Bool'
-});
-
-const cmdToggleReceive = new ROSLIB.Topic({
-    ros: ros,
-    name: '/cmd_toggle_receive',
     messageType: 'std_msgs/Bool'
 });
 
@@ -59,13 +53,6 @@ const cmdEmergencyStop = new ROSLIB.Topic({
     messageType: 'std_msgs/Bool'
 });
 
-const cmdAim = new ROSLIB.Topic({
-    ros: ros,
-    name: '/cmd_aim',
-    messageType: 'std_msgs/Int16'
-});
-
-// Subscribers
 const currentAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/angle',
@@ -85,7 +72,7 @@ const errorAngle = new ROSLIB.Topic({
 });
 
 
-
+// global variables and functions
 var targetAngle = 0;
 var targetDuty = 0;
 
