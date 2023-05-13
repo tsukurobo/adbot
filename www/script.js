@@ -180,7 +180,7 @@ class Rectangle {
 const PoleTypes = [];
 PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
 const PoleCoordinates = [];
-PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 665], [675, 665], [550, 540], [425, 415], [675, 415], [300, 140], [550, 140], [800, 140]);
+PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 740], [675, 740], [550, 540], [425, 340], [675, 340], [300, 140], [550, 140], [800, 140]);
 const PoleTargetAngles = [];
 PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));//パラメータ：各ポールのプリセットangle
 const PoleTargetDuties = [];
@@ -199,6 +199,17 @@ class Pole extends Rectangle {
         updateAngle(targetAngle, ctx);
         targetDuty = PoleTargetDuties[this.no];
         updateDuty(targetDuty, ctx);
+    }
+    draw(ctx, color = this.color, isSelected = false) {
+        ctx.clearRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
+        if (isSelected) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
+            ctx.restore();
+        }
+        super.draw(ctx, color);
     }
 }
 
@@ -386,6 +397,23 @@ class DirectionalPad {
     }
 }
 
+class ConnectionStatusDisplay {
+    constructor(x, y, w, h) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+    }
+
+    draw(ctx, color, text) {
+        ctx.save();
+        ctx.clearRect(this.x, this.y, this.w, this.h);
+        ctx.fillStyle = color;
+        ctx.font = '48px "Roboto","Noto Sans JP", sans-serif';
+        ctx.fillText(text, this.x, this.y + 50);
+        ctx.restore();
+    }
+}
 const main = () => {
     const canvas = document.getElementById("canvas");
 
@@ -446,10 +474,10 @@ const main = () => {
     // items.push(directionalPadLarge.left);
     // items.push(directionalPadLarge.right);
 
-    const aimControllerByTouchRight = new AimControllerByTouch(1750, 550, 100, 100, 130, 'blue');
-    touchItems.push(aimControllerByTouchRight);
-    const aimControllerByTouchLeft = new AimControllerByTouch(1600, 550, 100, 100, -130, 'blue');
-    touchItems.push(aimControllerByTouchLeft);
+    // const aimControllerByTouchRight = new AimControllerByTouch(1750, 550, 100, 100, 130, 'blue');
+    // touchItems.push(aimControllerByTouchRight);
+    // const aimControllerByTouchLeft = new AimControllerByTouch(1600, 550, 100, 100, -130, 'blue');
+    // touchItems.push(aimControllerByTouchLeft);
 
     const stopShooting = new StopDuty(1670, 670, 300, 100, 0, 'gray');
     items.push(stopShooting);
@@ -461,38 +489,22 @@ const main = () => {
     ctx.save();
     ctx.font = '48px "Roboto Mono", "Noto Sans JP", sans-serif';
     ctx.fillText('Duty:', 1100, 800);
-    // ctx.fillText('Current Angle:', 1100, 850);
-    // ctx.fillText('Target Angle:', 1100, 900);
     ctx.fillText('ポールの距離:', 1100, 850);
     ctx.fillText('ポールのずれ:', 1100, 900);
+    ctx.restore();
 
+    const connectionStatusDisplay = new ConnectionStatusDisplay(1100, 900, 820, 60);
     ros.on('connection', function () {
-        ctx.save();
-        ctx.clearRect(1100, 900, 820, 60);
-        ctx.fillStyle = "black";
-        ctx.font = '48px "Roboto", "Noto Sans JP", sans-serif';
-        ctx.fillText('接続成功', 1100, 950);
-        ctx.restore();
+        connectionStatusDisplay.draw(ctx, 'black', '接続成功');
     });
 
     ros.on('error', function (error) {
-        ctx.save();
-        ctx.clearRect(1100, 900, 820, 60);
-        ctx.fillStyle = "red";
-        ctx.font = '48px "Roboto", "Noto Sans JP", sans-serif';
-        ctx.fillText('接続失敗', 1100, 950);
-        ctx.restore();
+        connectionStatusDisplay.draw(ctx, 'red', '接続失敗');
     });
 
     ros.on('close', function () {
-        ctx.save();
-        ctx.clearRect(1100, 900, 820, 60);
-        ctx.fillStyle = "red";
-        ctx.font = '48px "Roboto","Noto Sans JP", sans-serif';
-        ctx.fillText('接続終了', 1100, 950);
-        ctx.restore();
+        connectionStatusDisplay.draw(ctx, 'red', '接続終了');
     });
-    ctx.restore();
 
 
 
