@@ -76,16 +76,18 @@ const errorAngle = new ROSLIB.Topic({
 var targetAngle = 0;
 var targetDuty = 0;
 
-function updateAngle(newAngle, ctx) {
+function updateAngle(newAngle, ctx, toBePublished = true) {
     targetAngle = newAngle;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
     // ctx.clearRect(1500, 850, 420, 50);
     // ctx.fillText(targetAngle, 1500, 900);
-    const angle = new ROSLIB.Message({
-        data: targetAngle
-    })
-    cmdAngle.publish(angle);
+    if (toBePublished) {
+        const angle = new ROSLIB.Message({
+            data: targetAngle
+        })
+        cmdAngle.publish(angle);
+    }
     ctx.restore();
 }
 
@@ -446,6 +448,11 @@ const main = () => {
         console.log(params);
     });
 
+    // Subscribe to topics
+
+    cmdAngle.subscribe(function (message) {
+        updateAngle(message.data, ctx,false);
+    });
 
     currentAngle.subscribe(function (message) {
         ctx.save();
