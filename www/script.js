@@ -152,7 +152,7 @@ class Rectangle {
         ctx.fillStyle = color;
         ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
         ctx.fillStyle = "white";
-        ctx.font = 'bold 48px "Roboto", sans-serif';
+        ctx.font = 'bold 48px "Roboto Mono", sans-serif';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
         ctx.fillText(this.str, this.x, this.y);
@@ -357,7 +357,7 @@ class ConnectionStatusDisplay {
         ctx.save();
         ctx.clearRect(this.x, this.y, this.w, this.h);
         ctx.fillStyle = color;
-        ctx.font = '48px "Roboto","Noto Sans JP", sans-serif';
+        ctx.font = '48px "Roboto Mono","Noto Sans JP", sans-serif';
         ctx.fillText(text, this.x, this.y + 50);
         ctx.restore();
     }
