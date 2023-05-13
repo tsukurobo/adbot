@@ -12,6 +12,10 @@
   	<arg name="webpath" value="$(arg webpath)"/>
 	</include>
 
+	<node name="xbox_gamepad" type="joy_node" pkg="joy" output="screen">
+		
+	</node>
+
 	<group if="$(arg arduino)">
 		<node name="aruduino" pkg="rosserial_arduino" type="serial_node.py" required="true"  output="screen">
 			<param name="port" value="/dev/ttyACM0"/>
