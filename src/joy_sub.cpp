@@ -99,7 +99,7 @@ void aimingPoleCb(const std_msgs::Int16 &polemsg)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "interpreter");
+    ros::init(argc, argv, "joy_sub");
     ros::NodeHandle nh;
     cmdToggleShootPub = nh.advertise<std_msgs::Bool>("cmd_toggle_shoot", 10);
     cmdAimingPolePub = nh.advertise<std_msgs::Int16>("cmd_aiming_pole", 10);

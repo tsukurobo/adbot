@@ -15,7 +15,7 @@
 	<node name="xbox_gamepad" type="joy_node" pkg="joy" output="screen">
 	</node>
 
-	<node name="interpreter" type="interpreter" pkg="adbot" output="screen" />
+	<node name="joy_sub" type="joy_sub" pkg="adbot" output="screen" />
 
 	<group if="$(arg arduino)">
 		<node name="aruduino" pkg="rosserial_arduino" type="serial_node.py" required="true"  output="screen">

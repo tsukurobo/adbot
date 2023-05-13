@@ -133,7 +133,7 @@ catkin_package(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/adbot_node.cpp)
-# add_executable(interpreter src/interpreter.cpp)
+# add_executable(joy_sub src/joy_sub.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,7 +147,7 @@ catkin_package(
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(
-#     interpreter
+#     joy_sub
 #   ${catkin_LIBRARIES}
 # )
 
@@ -208,5 +208,5 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(interpreter src/interpreter.cpp)
-target_link_libraries(interpreter ${catkin_LIBRARIES})
+add_executable(joy_sub src/joy_sub.cpp)
+target_link_libraries(joy_sub ${catkin_LIBRARIES})
