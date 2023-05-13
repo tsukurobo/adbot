@@ -22,11 +22,6 @@ const cmdAngle = new ROSLIB.Topic({
     messageType: 'std_msgs/Float64'
 });
 
-const cmdAngleAdjust = new ROSLIB.Topic({
-    ros: ros,
-    name: '/cmd_angle_adjust',
-    messageType: 'std_msgs/Int16'
-});
 
 const cmdDuty = new ROSLIB.Topic({
     ros: ros,
@@ -340,26 +335,6 @@ class StopDuty extends Rectangle {
 
 }
 
-class AngleAdjustor extends Rectangle {
-    constructor(x, y, w, h, diff, color) {
-        super(x, y, w, h, diff >= 0 ? '→' : '←', color);
-        // this.diff = degToRad(diff);
-        this.diff = diff;
-    }
-
-    onClick(ctx) {
-        super.onClick(ctx);
-        // console.info("Adjusting Angle to " + targetAngle);
-        // targetAngle += this.diff;
-        // updateAngle(targetAngle, ctx);
-        const angleAdjust = new ROSLIB.Message({
-            data: this.diff
-        })
-        cmdAngleAdjust.publish(angleAdjust);
-        console.log("Adjusting Angle:" + this.diff);
-    }
-}
-
 class AimControllerByTouch extends Rectangle {
     constructor(x, y, w, h, duty, color) {
         super(x, y, w, h, duty >= 0 ? '→' : '←', color);
@@ -392,9 +367,7 @@ class DirectionalPad {
         this.color = color;
         this.up = new DutyAdjustor(x, y - buttonHeight, buttonWidth, buttonHeight, dutyDiff, color);
         this.down = new DutyAdjustor(x, y + buttonHeight, buttonWidth, buttonHeight, -dutyDiff, color);
-        // this.left = new AngleAdjustor(x - buttonWidth, y, buttonWidth, buttonHeight, -angleDiff, color);
-        // this.right = new AngleAdjustor(x + buttonWidth, y, buttonWidth, buttonHeight, angleDiff, color);
-    }
+     }
 }
 
 class ConnectionStatusDisplay {
