@@ -4,7 +4,7 @@
 	<arg name="port" default="8085"/> <!-- avoid to use apache default port -->
 	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
 	<arg name="use_roswww" default="true" />
-	<arg name="arduino" default="true"/>
+	<arg name="arduino" default="false"/>
 
 	<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 	<include if="$(arg use_roswww)" file="$(find roswww)/launch/roswww.launch">
@@ -16,6 +16,7 @@
 	</node>
 
 	<node name="joy_sub" type="joy_sub" pkg="adbot" output="screen" />
+	<node name="interpreter" type="interpreter" pkg="adbot" output="screen" />
 
 	<group if="$(arg arduino)">
 		<node name="aruduino" pkg="rosserial_arduino" type="serial_node.py" required="true"  output="screen">

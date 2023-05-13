@@ -7,14 +7,16 @@
 ros::Publisher cmdToggleShootPub;
 ros::Publisher cmdAimingPolePub;
 // ros::Publisher cmdAnglePub;
-// ros::Publisher cmdShootingDutyPub;
+ros::Publisher cmdShootingDutyPub;
 ros::Publisher cmdAngleAdjustPub;
 ros::Publisher cmdToggleBeltPub;
 ros::Publisher cmdEmergencyStopPub;
 ros::Subscriber joySub;
 ros::Subscriber cmdAimingPoleSub;
+ros::Subscriber cmdShootingDutySub;
 
 int aimingPole = 6;
+int shootingDuty = 0;
 
 enum class XBOX_AXES
 {
@@ -83,6 +85,13 @@ void joyCb(const sensor_msgs::Joy &joymsg)
         pub.data = pole;
         cmdAimingPolePub.publish(pub);
     }
+    else if (const int value = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR))
+    {
+        std_msgs::Int16 pub;
+        int duty = shootingDuty + (value == 1 ? 1 : -1);
+        pub.data = duty;
+        cmdShootingDutyPub.publish(pub);
+    }
     // else if (const int value = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
     else
     {
@@ -92,9 +101,13 @@ void joyCb(const sensor_msgs::Joy &joymsg)
     }
 }
 
-void aimingPoleCb(const std_msgs::Int16 &polemsg)
+void cmdAimingPoleCb(const std_msgs::Int16 &polemsg)
 {
     aimingPole = polemsg.data;
+}
+void cmdShootingDutyCb(const std_msgs::Int16 &dutymsg)
+{
+    shootingDuty = dutymsg.data;
 }
 
 int main(int argc, char **argv)
@@ -106,9 +119,11 @@ int main(int argc, char **argv)
     cmdToggleBeltPub = nh.advertise<std_msgs::Bool>("cmd_toggle_belt", 10);
     cmdEmergencyStopPub = nh.advertise<std_msgs::Bool>("cmd_emergency_stop", 10);
     cmdAngleAdjustPub = nh.advertise<std_msgs::Float64>("cmd_angle_adjust", 10);
+    cmdShootingDutyPub = nh.advertise<std_msgs::Int16>("cmd_shooting_duty", 10);
 
     joySub = nh.subscribe("joy", 10, joyCb);
-    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, aimingPoleCb);
+    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, cmdAimingPoleCb);
+    cmdShootingDutySub =  nh.subscribe("cmd_shooting_duty", 10, cmdShootingDutyCb);
 
     ros::Rate loop_rate(10);
     while (ros::ok())

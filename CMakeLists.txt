@@ -210,3 +210,5 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(joy_sub src/joy_sub.cpp)
 target_link_libraries(joy_sub ${catkin_LIBRARIES})
+add_executable(interpreter src/interpreter.cpp)
+target_link_libraries(interpreter ${catkin_LIBRARIES})

@@ -29,6 +29,12 @@ const cmdDuty = new ROSLIB.Topic({
     messageType: 'std_msgs/Int16'
 });
 
+const cmdAimingPole = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_aiming_pole',
+    messageType: 'std_msgs/Int16'
+});
+
 const cmdToggleShoot = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_toggle_shoot',
@@ -80,8 +86,8 @@ function updateAngle(newAngle, ctx, toBePublished = true) {
     targetAngle = newAngle;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
-    // ctx.clearRect(1500, 850, 420, 50);
-    // ctx.fillText(targetAngle, 1500, 900);
+    ctx.clearRect(1550, 750, 420, 60);
+    ctx.fillText(targetAngle, 1550, 800);
     if (toBePublished) {
         const angle = new ROSLIB.Message({
             data: targetAngle
@@ -91,16 +97,18 @@ function updateAngle(newAngle, ctx, toBePublished = true) {
     ctx.restore();
 }
 
-function updateDuty(newDuty, ctx) {
+function updateDuty(newDuty, ctx, toBePublished = true) {
     targetDuty = newDuty;
     ctx.save();
     ctx.font = '48px "Roboto Mono", sans-serif';
     ctx.clearRect(1250, 750, 220, 60);
     ctx.fillText(targetDuty, 1250, 800);
-    const duty = new ROSLIB.Message({
-        data: targetDuty
-    })
-    cmdDuty.publish(duty);
+    if (toBePublished) {
+        const duty = new ROSLIB.Message({
+            data: targetDuty
+        })
+        cmdDuty.publish(duty);
+    }
     ctx.restore();
 }
 
@@ -178,8 +186,15 @@ class Pole extends Rectangle {
         this.no = no;
     }
     onClick(ctx) {
-        super.onClick(ctx);
         console.info("Aiming at Type " + this.type + " pole.");
+        this.draw(ctx, "red", true);
+        setTimeout(() => {
+            this.draw(ctx, this.color, true);
+        }, 300);
+        const aimingPole = new ROSLIB.Message({
+            data: this.no
+        })
+        cmdAimingPole.publish(aimingPole)
         targetAngle = PoleTargetAngles[this.no];
         updateAngle(targetAngle, ctx);
         targetDuty = PoleTargetDuties[this.no];
@@ -451,7 +466,18 @@ const main = () => {
     // Subscribe to topics
 
     cmdAngle.subscribe(function (message) {
-        updateAngle(message.data, ctx,false);
+        updateAngle(message.data, ctx, false);
+    });
+
+    cmdDuty.subscribe(function (message) {
+        updateDuty(message.data, ctx, false);
+    });
+
+    cmdAimingPole.subscribe(function (message) {
+        poles.forEach(pole => {
+            pole.draw(ctx, pole.color, false);
+        });
+        poles[message.data].draw(ctx, poles[message.data].color, true);
     });
 
     currentAngle.subscribe(function (message) {
