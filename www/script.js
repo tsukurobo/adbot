@@ -35,6 +35,12 @@ const cmdAimingPole = new ROSLIB.Topic({
     messageType: 'std_msgs/Int16'
 });
 
+const cmdReceive = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_receive',
+    messageType: 'std_msgs/Bool'
+});
+
 const cmdToggleShoot = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_toggle_shoot',
@@ -112,12 +118,6 @@ function updateDuty(newDuty, ctx, toBePublished = true) {
     ctx.restore();
 }
 
-function updateBelt(state, ctx) { // Currently the status is not displayed. To be added.
-    const toggle = new ROSLIB.Message({
-        data: state
-    })
-    cmdToggleBelt.publish(toggle);
-}
 
 function updateLidar(state, ctx) {
     const toggle = new ROSLIB.Message({
@@ -144,8 +144,13 @@ class Rectangle {
         this.color = color;
     }
 
-    draw(ctx, color = this.color) {
+    draw(ctx, color = this.color, isSelected = false) {
         ctx.save();
+        ctx.clearRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
+        if (isSelected) {
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
+        }
         ctx.fillStyle = color;
         ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
         ctx.fillStyle = "white";
@@ -156,10 +161,15 @@ class Rectangle {
         ctx.restore();
     }
 
+    onSubscribe(ctx, isSelected = false) {
+        console.log("subscribed " + isSelected);
+        this.draw(ctx, this.color, isSelected);
+    }
+
     onClick(ctx, timeout = 300) {
-        this.draw(ctx, "red");
+        this.draw(ctx, "red", true);
         setTimeout(() => {
-            this.draw(ctx);
+            this.draw(ctx, this.color, false);
         }, timeout);
     }
 
@@ -170,7 +180,7 @@ class Rectangle {
 }
 
 const PoleTypes = [];
-PoleTypes.push(1, 1, 1, 2, 2, 3, 2, 2, 1, 1, 1);
+PoleTypes.push(10, 10, 10, 30, 30, 70, 30, 30, 25, 25, 25);
 const PoleCoordinates = [];
 PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 740], [675, 740], [550, 540], [425, 340], [675, 340], [300, 140], [550, 140], [800, 140]);
 const PoleTargetAngles = [];
@@ -185,31 +195,19 @@ class Pole extends Rectangle {
         this.type = PoleTypes[no];
         this.no = no;
     }
-    onClick(ctx) {
+    onUnselected(ctx) {
+        this.draw(ctx, this.color, false);
+    }
+    onClick(ctx, timeout = 300) {
         console.info("Aiming at Type " + this.type + " pole.");
-        this.draw(ctx, "red", true);
-        setTimeout(() => {
-            this.draw(ctx, this.color, true);
-        }, 300);
         const aimingPole = new ROSLIB.Message({
             data: this.no
         })
-        cmdAimingPole.publish(aimingPole)
+        cmdAimingPole.publish(aimingPole);
         targetAngle = PoleTargetAngles[this.no];
         updateAngle(targetAngle, ctx);
         targetDuty = PoleTargetDuties[this.no];
         updateDuty(targetDuty, ctx);
-    }
-    draw(ctx, color = this.color, isSelected = false) {
-        ctx.clearRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
-        if (isSelected) {
-            ctx.save();
-            ctx.fillStyle = color;
-            ctx.fillStyle = "yellow";
-            ctx.fillRect(this.x - this.w / 2 - 10, this.y - this.h / 2 - 10, this.w + 20, this.h + 20);
-            ctx.restore();
-        }
-        super.draw(ctx, color);
     }
 }
 
@@ -217,8 +215,13 @@ class Shoot extends Rectangle {
     constructor(x, y) {
         super(x, y, 300, 100, 'Shoot', 'blue');
     }
-    onClick(ctx) {
-        super.onClick(ctx);
+    onSubscribe(ctx, timeout = 300) {
+        this.draw(ctx, "red", true);
+        setTimeout(() => {
+            this.draw(ctx, this.color, false);
+        }, timeout);
+    }
+    onClick() {
         console.info("Shooting");
         const toggle = new ROSLIB.Message({
             data: true
@@ -233,11 +236,25 @@ class Receive extends Rectangle {
         this.direction = direction;
     }
 
+    onSubscribe(ctx, isSelected = false, poles = []) {
+        super.onSubscribe(ctx, isSelected);
+        if (isSelected) {
+            poles.forEach(pole => {
+                pole.onUnselected(ctx);
+            });
+        }
+    }
+    onUnselected(ctx) {
+        this.draw(ctx, this.color, false);
+    }
     onClick(ctx) {
-        super.onClick(ctx);
         console.info("Receive in " + (this.direction ? "Right" : "Left"));
-        targetAngle = this.direction ? degToRad(-90) : degToRad(90);
-        updateAngle(targetAngle, ctx);
+        // targetAngle = this.direction ? degToRad(-90) : degToRad(90);
+        // updateAngle(targetAngle, ctx);
+        const pub = new ROSLIB.Message({
+            data: this.direction
+        })
+        cmdReceive.publish(pub);
     }
 }
 
@@ -246,8 +263,12 @@ class Emergency extends Rectangle {
         super(x, y, 300, 100, 'Emergency', 'gray');
     }
 
+    onSubscribe(ctx, isSelected = false) {
+        super.onSubscribe(ctx, isSelected);
+    }
+
     onClick(ctx) {
-        super.onClick(ctx);
+        // super.onClick(ctx);
         console.info("Emergency stop");
         const toggle = new ROSLIB.Message({
             data: true
@@ -264,8 +285,14 @@ class StatusButton extends Rectangle {
     }
 
     onClick(ctx) {
-        super.onClick(ctx, 0);
+        // super.onClick(ctx, 0);
         this.status = !this.status;
+    }
+
+    onSubscribe(ctx, isSelected = false) {
+        // super.onSubscribe(ctx, isSelected);
+        this.status = isSelected;
+        this.draw(ctx);
     }
 
     draw(ctx) {
@@ -280,8 +307,13 @@ class Belt extends StatusButton {
 
     onClick(ctx) {
         super.onClick(ctx);
-        updateBelt(this.status, ctx);
+        console.info("Belt " + (this.status ? "on" : "off"));
+        const toggle = new ROSLIB.Message({
+            data: this.status
+        })
+        cmdToggleBelt.publish(toggle);
     }
+
 }
 
 class Lidar extends StatusButton {
@@ -298,7 +330,7 @@ class Lidar extends StatusButton {
 
 class FullScreen extends StatusButton {
     constructor(x, y) {
-        super(x, y, 300, 100, 'Full Screen', 'blue', 'green');
+        super(x, y, 300, 100, '全画面', 'blue', 'green');
     }
 
     onClick(ctx) {
@@ -326,7 +358,7 @@ class DutyAdjustor extends Rectangle {
 }
 class StopDuty extends Rectangle {
     constructor(x, y, w, h, color) {
-        super(x, y, w, h, 'Stop', color);
+        super(x, y, w, h, '射出停止', color);
     }
 
     onClick(ctx) {
@@ -473,11 +505,40 @@ const main = () => {
         updateDuty(message.data, ctx, false);
     });
 
+    cmdToggleShoot.subscribe(function (message) {
+        shoot.onSubscribe(ctx);
+    });
+
+    cmdToggleBelt.subscribe(function (message) {
+        belt.onSubscribe(ctx, message.data);
+        console.log("heared belt" + message.data);
+    });
+
+    cmdEmergencyStop.subscribe(function (message) {
+        emergency.onSubscribe(ctx, message.data);
+    });
+
     cmdAimingPole.subscribe(function (message) {
         poles.forEach(pole => {
-            pole.draw(ctx, pole.color, false);
+            pole.onUnselected(ctx);
         });
-        poles[message.data].draw(ctx, poles[message.data].color, true);
+        receive_left.onUnselected(ctx);
+        receive_right.onUnselected(ctx);
+        poles[message.data].onSubscribe(ctx, true);
+    });
+
+    cmdReceive.subscribe(function (message) {
+        poles.forEach(pole => {
+            pole.onUnselected(ctx);
+        });
+        if (message.data) {
+            receive_right.onSubscribe(ctx, true);
+            receive_left.onUnselected(ctx);
+        }
+        else {
+            receive_left.onSubscribe(ctx, true);
+            receive_right.onUnselected(ctx);
+        }
     });
 
     currentAngle.subscribe(function (message) {

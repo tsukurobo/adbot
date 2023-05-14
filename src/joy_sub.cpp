@@ -6,6 +6,7 @@
 
 ros::Publisher cmdToggleShootPub;
 ros::Publisher cmdAimingPolePub;
+ros::Publisher cmdReceivePub;
 // ros::Publisher cmdAnglePub;
 ros::Publisher cmdShootingDutyPub;
 ros::Publisher cmdAngleAdjustPub;
@@ -14,9 +15,11 @@ ros::Publisher cmdEmergencyStopPub;
 ros::Subscriber joySub;
 ros::Subscriber cmdAimingPoleSub;
 ros::Subscriber cmdShootingDutySub;
+ros::Subscriber cmdToggleBeltSub;
 
 int aimingPole = 6;
 int shootingDuty = 0;
+bool belt = false;
 
 enum class XBOX_AXES
 {
@@ -58,46 +61,74 @@ void joyCb(const sensor_msgs::Joy &joymsg)
 
     if (getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
-        std_msgs::Bool pub;
-        pub.data = true;
-        cmdToggleShootPub.publish(pub);
-    }
-    else if (getJoyValue(joymsg, XBOX_BUTTONS::LB))
-    {
-        std_msgs::Bool pub;
-        pub.data = true;
-        cmdToggleBeltPub.publish(pub);
-    }
-    else if (getJoyValue(joymsg, XBOX_BUTTONS::BACK))
-    {
-        std_msgs::Bool pub;
-        pub.data = true;
-        cmdEmergencyStopPub.publish(pub);
-    }
-    else if (const int value = getJoyValue(joymsg, XBOX_AXES::CROSS_VER))
-    {
-        std_msgs::Int16 pub;
-        int pole = aimingPole + (value == 1 ? -1 : 1);
-        if (pole < 0)
-            pole = 0;
-        else if (pole > 10)
-            pole = 10;
-        pub.data = pole;
-        cmdAimingPolePub.publish(pub);
-    }
-    else if (const int value = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR))
-    {
-        std_msgs::Int16 pub;
-        int duty = shootingDuty + (value == 1 ? 1 : -1);
-        pub.data = duty;
-        cmdShootingDutyPub.publish(pub);
-    }
-    // else if (const int value = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
-    else
-    {
-        std_msgs::Float64 pub;
-        pub.data = -getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);
-        cmdAngleAdjustPub.publish(pub);
+        if (getJoyValue(joymsg, XBOX_BUTTONS::B))
+        {
+            std_msgs::Bool pub;
+            pub.data = true;
+            cmdToggleShootPub.publish(pub);
+        }
+        else if (getJoyValue(joymsg, XBOX_BUTTONS::START))
+        {
+            std_msgs::Bool pub;
+            pub.data = !belt;
+            cmdToggleBeltPub.publish(pub);
+        }
+        else if (getJoyValue(joymsg, XBOX_BUTTONS::BACK))
+        {
+            std_msgs::Bool pub;
+            pub.data = true;
+            cmdEmergencyStopPub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_AXES::CROSS_VER))
+        {
+            std_msgs::Int16 pub;
+            // int pole = aimingPole + (value == 1 ? -1 : 1);
+            // if (pole < 0)
+            //     pole = 0;
+            // else if (pole > 10)
+            //     pole = 10;
+            pub.data = value == 1 ? 3 : 4;
+            cmdAimingPolePub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR))
+        {
+            std_msgs::Int16 pub;
+            pub.data = value == 1 ? 5 : 1;
+            cmdAimingPolePub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_BUTTONS::X))
+        {
+            std_msgs::Int16 pub;
+            int duty = shootingDuty + 1;
+            pub.data = duty;
+            cmdShootingDutyPub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_BUTTONS::A))
+        {
+            std_msgs::Int16 pub;
+            int duty = shootingDuty - 1;
+            pub.data = duty;
+            cmdShootingDutyPub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_AXES::RT) < -0.7)
+        { // 右受取
+            std_msgs::Bool pub;
+            pub.data = true;
+            cmdReceivePub.publish(pub);
+        }
+        else if (const int value = getJoyValue(joymsg, XBOX_AXES::LT) < -0.7)
+        { // 左受取
+            std_msgs::Bool pub;
+            pub.data = false;
+            cmdReceivePub.publish(pub);
+        }
+        // else if (const int value = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
+        else
+        {// 将来的にバグの原因になるかも？
+            std_msgs::Float64 pub;
+            pub.data = -getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);
+            cmdAngleAdjustPub.publish(pub);
+        }
     }
 }
 
@@ -109,6 +140,10 @@ void cmdShootingDutyCb(const std_msgs::Int16 &dutymsg)
 {
     shootingDuty = dutymsg.data;
 }
+void cmdToggleBeltCb(const std_msgs::Bool &beltmsg)
+{
+    belt = beltmsg.data;
+}
 
 int main(int argc, char **argv)
 {
@@ -116,6 +151,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     cmdToggleShootPub = nh.advertise<std_msgs::Bool>("cmd_toggle_shoot", 10);
     cmdAimingPolePub = nh.advertise<std_msgs::Int16>("cmd_aiming_pole", 10);
+    cmdReceivePub = nh.advertise<std_msgs::Bool>("cmd_receive", 10);
     cmdToggleBeltPub = nh.advertise<std_msgs::Bool>("cmd_toggle_belt", 10);
     cmdEmergencyStopPub = nh.advertise<std_msgs::Bool>("cmd_emergency_stop", 10);
     cmdAngleAdjustPub = nh.advertise<std_msgs::Float64>("cmd_angle_adjust", 10);
@@ -123,7 +159,8 @@ int main(int argc, char **argv)
 
     joySub = nh.subscribe("joy", 10, joyCb);
     cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, cmdAimingPoleCb);
-    cmdShootingDutySub =  nh.subscribe("cmd_shooting_duty", 10, cmdShootingDutyCb);
+    cmdShootingDutySub = nh.subscribe("cmd_shooting_duty", 10, cmdShootingDutyCb);
+    cmdToggleBeltSub = nh.subscribe("cmd_toggle_belt", 10, cmdToggleBeltCb);
 
     ros::Rate loop_rate(10);
     while (ros::ok())
