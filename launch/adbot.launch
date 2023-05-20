@@ -24,4 +24,11 @@
 			<param name="baud" value="2000000"/>
 		</node>
 	</group>
+
+	<!-- <node name="lidar_aim" pkg="adbot" type="lidar_aim_node.cpp" output="screen"/>	
+
+	<node name="urg_node" pkg="urg_node" type="urg_node" required="true">
+		<param name="ip_address" value="192.168.0.10"/>
+	</node> -->
+
 </launch>
