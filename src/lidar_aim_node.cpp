@@ -27,7 +27,7 @@ double degToRad(double deg)
     return deg * 3.1415926535 / 180;
 }
 
-double distance_angle_list[2][11] = {{3.758, 1.97, 3.758, 4.083, 4.083, 5.17, 4.355, 4.355, 8.961, 8.37, 8.961}, {degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20)}};
+double distance_angle_list[2][11] = {{3.758, 1.97, 3.758, 4.083, 4.083, 1.97, 4.355, 4.355, 8.961, 8.37, 8.961}, {degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20)}};
 double right_angle;
 double distance_to_pole;
 double around_pole = 0.3;
@@ -46,7 +46,7 @@ void scan_callback(sensor_msgs::LaserScan msg)
             }
         }
     }
-    error_angle.data = degToRad((point - 539) * 0.25);
+    error_angle.data = -degToRad((point - 539) * 0.25);
 }
 
 void lidar_callback(std_msgs::Bool cmd_toggle_Lidar) {
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     while (ros::ok()) {
         if (bool_lidar) {
             if (bool_pole) {
-                if (angle_diff < 0.5) {
+                if (angle_diff < 0.3) {
                     pub_angle.publish(error_angle);
                     cmd_angle.publish(error_angle);
                 } else {
