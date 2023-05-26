@@ -47,6 +47,18 @@ int main(int argc, char **argv)
     cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, aimingPoleCb);
     cmdReceiveSub = nh.subscribe("cmd_receive", 10, receiveCb);
 
+    XmlRpc::XmlRpcValue pole_duty;
+    nh.getParam("/pole/duty", pole_duty);
+    
+    /*To ensure the reading will happen if the data is provided in right format*/
+    if (pole_duty.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+        for (int i = 0; i < pole_duty.size(); i++)
+        {
+            poleTargetDuties[i] = pole_duty[i];
+        }
+    }
+
     ros::Rate loop_rate(10);
     while (ros::ok())
     {
