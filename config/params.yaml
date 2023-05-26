@@ -2,3 +2,16 @@ belt_duty: 500
 
 pole:
   duty: [470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620]
+
+arduino: {
+  pid: {
+    capable_duty: 0.4,
+    Kp: 10.0,
+    Ki: 0.0,
+    Kd: 0.0
+  },
+
+  const: {
+    
+  }
+}
