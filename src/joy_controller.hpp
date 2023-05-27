@@ -258,7 +258,7 @@ void JoyController::update()
     }
     else if (!emergencyStop.sent && getJoyValue(joymsg, XBOX_BUTTONS::BACK) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
-        emergencyStop.current = !toggleBelt.current;
+        emergencyStop.current = !emergencyStop.current;
         emergencyStop.publish();
     }
 
