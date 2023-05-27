@@ -34,11 +34,16 @@ public:
     ros::Publisher Publisher;
     bool sent = false;
     Command(ros::Publisher Publisher);
+    Command();
     ~Command();
 };
 
 Command::Command(ros::Publisher Publisher) : Publisher(Publisher)
 {
+}
+
+Command::Command(){
+
 }
 
 Command::~Command()
@@ -51,6 +56,7 @@ public:
     bool current = false;
     void publish();
     BoolCommand(ros::Publisher Publisher);
+    BoolCommand();
     ~BoolCommand();
 };
 
@@ -58,6 +64,11 @@ BoolCommand::BoolCommand(ros::Publisher Publisher) : Command(Publisher)
 {
 }
 
+BoolCommand::BoolCommand(){
+}
+
+BoolCommand::~BoolCommand(){
+}
 void BoolCommand::publish()
 {
     std_msgs::Bool pub;
@@ -72,10 +83,18 @@ public:
     int16_t current = 0;
     void publish();
     Int16Command(ros::Publisher Publisher);
+    Int16Command();
     ~Int16Command();
 };
 
 Int16Command::Int16Command(ros::Publisher Publisher) : Command(Publisher)
+{
+}
+
+Int16Command::Int16Command() 
+{
+}
+Int16Command::~Int16Command() 
 {
 }
 
@@ -102,6 +121,7 @@ class JoyController
 private:
     BoolCommand toggleShoot;
     BoolCommand toggleBelt;
+    BoolCommand toggleLidar;
     BoolCommand emergencyStop;
     Int16Command aimingPole;
     BoolCommand receive;
@@ -112,43 +132,57 @@ private:
     ros::Subscriber cmdAimingPoleSub;
     ros::Subscriber cmdShootingDutySub;
     ros::Subscriber cmdToggleBeltSub;
+    ros::Subscriber cmdToggleLidarSub;
     ros::Subscriber cmdEmergencyStopSub;
 
-    sensor_msgs::Joy &joymsg;
-    sensor_msgs::Joy &lastJoymsg;
+    sensor_msgs::Joy joymsg;
+    sensor_msgs::Joy lastJoymsg;
+
+    bool executed = true;
+
+public:
 
     void joyCb(const sensor_msgs::Joy &joymsg);
     void cmdAimingPoleCb(const std_msgs::Int16 &msg);
     void cmdShootingDutyCb(const std_msgs::Int16 &msg);
     void cmdToggleBeltCb(const std_msgs::Bool &msg);
+    void cmdToggleLidarCb(const std_msgs::Bool &msg);
     void cmdEmergencyStopCb(const std_msgs::Bool &msg);
 
-
-public:
     JoyController(ros::NodeHandle &nh);
     void update();
+    // void init(ros::NodeHandle &nh);
 };
 
 JoyController::JoyController(ros::NodeHandle &nh)
 {
     toggleShoot = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_toggle_shoot", 10));
     toggleBelt = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_toggle_belt", 10));
+    toggleLidar = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_toggle_lidar", 10));
     aimingPole = Int16Command(nh.advertise<std_msgs::Int16>("cmd_aiming_pole", 10));
     receive = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_receive", 10));
     shootingDuty = Int16Command(nh.advertise<std_msgs::Int16>("cmd_shooting_duty", 10));
     angleAdjust = Command(nh.advertise<std_msgs::Float64>("cmd_angle_adjust", 10));
     emergencyStop = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_emergency_stop", 10));
 
-    joySub = nh.subscribe("joy", 10, joyCb);
-    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, cmdAimingPoleCb);
-    cmdShootingDutySub = nh.subscribe("cmd_shooting_duty", 10, cmdShootingDutyCb);
-    cmdToggleBeltSub = nh.subscribe("cmd_toggle_belt", 10, cmdToggleBeltCb);
-    cmdEmergencyStopSub = nh.subscribe("cmd_emergency_stop", 10, cmdEmergencyStopCb);
+    joySub = nh.subscribe("joy", 10, &JoyController::joyCb,this);
+    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10,  &JoyController::cmdAimingPoleCb,this);
+    cmdShootingDutySub = nh.subscribe("cmd_shooting_duty", 10,  &JoyController::cmdShootingDutyCb,this);
+    cmdToggleBeltSub = nh.subscribe("cmd_toggle_belt", 10,  &JoyController::cmdToggleBeltCb,this);
+    cmdToggleLidarSub = nh.subscribe("cmd_toggle_lidar", 10,  &JoyController::cmdToggleLidarCb,this);
+    cmdEmergencyStopSub = nh.subscribe("cmd_emergency_stop", 10,  &JoyController::cmdEmergencyStopCb,this);
+
 }
+
+// void JoyController::init(ros::NodeHandle &nh){
+// }
 
 inline void JoyController::joyCb(const sensor_msgs::Joy &joymsg)
 {
+    ROS_INFO("Recieved joy msg");
+    this->lastJoymsg = this->joymsg;
     this->joymsg = joymsg;
+    this->executed = false;
 }
 
 inline void JoyController::cmdAimingPoleCb(const std_msgs::Int16 &msg)
@@ -166,6 +200,11 @@ inline void JoyController::cmdToggleBeltCb(const std_msgs::Bool &msg)
     toggleBelt.current = msg.data;
 }
 
+inline void JoyController::cmdToggleLidarCb(const std_msgs::Bool &msg)
+{
+    toggleLidar.current = msg.data;
+}
+
 inline void JoyController::cmdEmergencyStopCb(const std_msgs::Bool &msg)
 {
     emergencyStop.current = msg.data;
@@ -173,7 +212,12 @@ inline void JoyController::cmdEmergencyStopCb(const std_msgs::Bool &msg)
 
 void JoyController::update()
 {
+    if(executed){
+        return;
+    }
+    ROS_INFO("Interpreting joymsg");
     // リング分離の起動
+    ROS_INFO(toggleShoot.sent ? "sent" : "not sent");
     if (toggleShoot.sent && !getJoyValue(joymsg, XBOX_BUTTONS::B))
     {
         toggleShoot.sent = false;
@@ -182,6 +226,7 @@ void JoyController::update()
     {
         toggleShoot.current = true;
         toggleShoot.publish();
+        ROS_INFO("sending shooter message");
     }
 
     // ベルト起動
@@ -193,6 +238,17 @@ void JoyController::update()
     {
         toggleBelt.current = !toggleBelt.current;
         toggleBelt.publish();
+    }
+
+    // LiDar
+    if (toggleLidar.sent && !getJoyValue(joymsg, XBOX_BUTTONS::Y))
+    {
+        toggleLidar.sent = false;
+    }
+    else if (!toggleLidar.sent && getJoyValue(joymsg, XBOX_BUTTONS::Y) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
+    {
+        toggleLidar.current = !toggleLidar.current;
+        toggleLidar.publish();
     }
 
     // 緊急停止
@@ -232,20 +288,21 @@ void JoyController::update()
     }
     else
     {
-        if (aimingPole.sent && ((getJoyValue(joymsg, XBOX_AXES::CROSS_VER) != getJoyValue(lastJoymsg, XBOX_AXES::CROSS_VER)) && (getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) != getJoyValue(lastJoymsg, XBOX_AXES::CROSS_HOR))))
+        aimingPole.sent=false;
+        int poleToAim = -1;
+        if (getJoyValue(joymsg, XBOX_AXES::CROSS_VER) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
-            aimingPole.sent = false;
+            poleToAim = getJoyValue(joymsg, XBOX_AXES::CROSS_VER) == 1 ? 3 : 4;
+            // aimingPole.publish();
         }
-        else if (!aimingPole.sent && getJoyValue(joymsg, XBOX_AXES::CROSS_VER) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
+        else if (getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
-            aimingPole.current = getJoyValue(joymsg, XBOX_AXES::CROSS_VER) == 1 ? 3 : 4;
+            poleToAim =  getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 1;
+            // aimingPole.publish();
+        }
+        if(poleToAim != aimingPole.current && poleToAim>-1){
+            aimingPole.current = poleToAim;
             aimingPole.publish();
-        }
-        else if (!aimingPole.sent && getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
-        {
-            std_msgs::Int16 pub;
-            pub.data = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 1;
-            aimingPole.Publisher.publish(pub);
         }
     }
     // 受け渡し
@@ -268,7 +325,7 @@ void JoyController::update()
     }
     else if (getJoyValue(joymsg, XBOX_BUTTONS::A) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
-        shootingDuty.current -= 2;
+        shootingDuty.current -= 1;
         shootingDuty.publish();
     }
 
@@ -287,5 +344,5 @@ void JoyController::update()
         angleAdjust.Publisher.publish(pub);
         angleAdjust.sent = false;
     }
-    lastJoymsg = joymsg;
+    executed = true;
 }
