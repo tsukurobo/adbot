@@ -292,12 +292,12 @@ void JoyController::update()
         int poleToAim = -1;
         if (getJoyValue(joymsg, XBOX_AXES::CROSS_VER) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
-            poleToAim = getJoyValue(joymsg, XBOX_AXES::CROSS_VER) == 1 ? 3 : 4;
+            poleToAim = getJoyValue(joymsg, XBOX_AXES::CROSS_VER) == 1 ? 2 : 8;
             // aimingPole.publish();
         }
         else if (getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
-            poleToAim =  getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 1;
+            poleToAim =  getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 4;
             // aimingPole.publish();
         }
         if(poleToAim != aimingPole.current && poleToAim>-1){

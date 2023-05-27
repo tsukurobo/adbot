@@ -180,9 +180,9 @@ class Rectangle {
 }
 
 const PoleTypes = [];
-PoleTypes.push(10, 10, 10, 30, 30, 70, 30, 30, 25, 25, 25);
+PoleTypes.push(10, 25,30,30,10,70,25,30,30,25,10);
 const PoleCoordinates = [];
-PoleCoordinates.push([300, 940], [550, 940], [800, 940], [425, 740], [675, 740], [550, 540], [425, 340], [675, 340], [300, 140], [550, 140], [800, 140]);
+PoleCoordinates.push([300, 940], [300, 140], [425, 740],[425, 340], [550, 940], [550, 540], [550, 140],  [675, 340],  [675, 740], [800, 140],[800, 940]);
 const PoleTargetAngles = [];
 PoleTargetAngles.push(degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20));//パラメータ：各ポールのプリセットangle
 const PoleTargetDuties = [];

@@ -4,7 +4,7 @@
 	<arg name="port" default="8085"/> <!-- avoid to use apache default port -->
 	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
 	<arg name="use_roswww" default="true" />
-	<arg name="arduino" default="false"/>
+	<arg name="arduino" default="true"/>
 	<arg name="lidar_aim" default="false"/>
 
 	<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
@@ -28,7 +28,7 @@
 
 	<group if="$(arg lidar_aim)">
 		<node name="lidar_aim" pkg="adbot" type="lidar_aim" output="screen">
-			<param name="lidar_pos" value="0.17"/>
+			<!-- <param name="lidar_pos" value="0.17"/> -->
 		</node>	
 	
 		<node name="urg_node" pkg="urg_node" type="urg_node" required="true">

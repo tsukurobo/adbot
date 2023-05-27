@@ -1,6 +1,7 @@
 pole:
   duty: [470, 371, 472, 533, 534, 645, 620, 620, 620, 620, 620]
 
+lidar_pos: 0.17
 arduino: {
   aim: {
     manual_duty: 120, #手動照準のDuty

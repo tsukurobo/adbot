@@ -100,28 +100,28 @@ int main(int argc, char **argv)
     pnh.getParam("lidar_pos", lidar_posit1on);
     // 距離計算
     distance_angle_list[0][0] = sqrt(pow(lidar_posit1on + TYPE1_X, 2) + pow(TYPE1_Y, 2)) - TIPE12_r;
-    distance_angle_list[0][1] = TYPE1_X - TIPE12_r;
-    distance_angle_list[0][2] = distance_angle_list[0][0];
-    distance_angle_list[0][3] = sqrt(pow(lidar_posit1on + TYPE2_X, 2) + pow(TYPE2_Y, 2)) - TIPE12_r;
-    distance_angle_list[0][4] = distance_angle_list[0][3];
+    distance_angle_list[0][4] = TYPE1_X - TIPE12_r;
+    distance_angle_list[0][10] = distance_angle_list[0][0];
+    distance_angle_list[0][2] = sqrt(pow(lidar_posit1on + TYPE2_X, 2) + pow(TYPE2_Y, 2)) - TIPE12_r;
+    distance_angle_list[0][8] = distance_angle_list[0][3];
     distance_angle_list[0][5] = TYPE1_X - TIPE12_r;
-    distance_angle_list[0][6] = sqrt(pow(lidar_posit1on + BACK_TYPE2_X, 2) + pow(BACK_TYPE2_Y, 2)) - TIPE12_r;
+    distance_angle_list[0][3] = sqrt(pow(lidar_posit1on + BACK_TYPE2_X, 2) + pow(BACK_TYPE2_Y, 2)) - TIPE12_r;
     distance_angle_list[0][7] = distance_angle_list[0][6];
-    distance_angle_list[0][8] = sqrt(pow(lidar_posit1on + BACK_TYPE1_X, 2) + pow(BACK_TYPE1_Y, 2)) - TIPE12_r;
-    distance_angle_list[0][9] = TYPE1_X - TIPE12_r;
-    distance_angle_list[0][10] = distance_angle_list[0][8];
+    distance_angle_list[0][1] = sqrt(pow(lidar_posit1on + BACK_TYPE1_X, 2) + pow(BACK_TYPE1_Y, 2)) - TIPE12_r;
+    distance_angle_list[0][6] = TYPE1_X - TIPE12_r;
+    distance_angle_list[0][9] = distance_angle_list[0][8];
     // 角度計算
     distance_angle_list[1][0] = -atan(TYPE1_Y / (lidar_posit1on + TYPE1_X));
-    distance_angle_list[1][1] = 0;
-    distance_angle_list[1][2] = atan(TYPE1_Y / (lidar_posit1on + TYPE1_X));
-    distance_angle_list[1][3] = -atan(TYPE2_Y / (lidar_posit1on + TYPE2_X));
-    distance_angle_list[1][4] = atan(TYPE2_Y / (lidar_posit1on + TYPE2_X));
+    distance_angle_list[1][4] = 0;
+    distance_angle_list[1][10]= atan(TYPE1_Y / (lidar_posit1on + TYPE1_X));
+    distance_angle_list[1][2] = -atan(TYPE2_Y / (lidar_posit1on + TYPE2_X));
+    distance_angle_list[1][8] = atan(TYPE2_Y / (lidar_posit1on + TYPE2_X));
     distance_angle_list[1][5] = 0;
-    distance_angle_list[1][6] = -atan(BACK_TYPE2_Y / (lidar_posit1on + BACK_TYPE2_X));
+    distance_angle_list[1][3] = -atan(BACK_TYPE2_Y / (lidar_posit1on + BACK_TYPE2_X));
     distance_angle_list[1][7] = atan(BACK_TYPE2_Y / (lidar_posit1on + BACK_TYPE2_X));
-    distance_angle_list[1][8] = -atan(BACK_TYPE1_Y / (lidar_posit1on + BACK_TYPE1_X));
-    distance_angle_list[1][9] = 0;
-    distance_angle_list[1][10] = atan(BACK_TYPE1_Y / (lidar_posit1on + BACK_TYPE1_X));
+    distance_angle_list[1][1] = -atan(BACK_TYPE1_Y / (lidar_posit1on + BACK_TYPE1_X));
+    distance_angle_list[1][6] = 0;
+    distance_angle_list[1][9]  = atan(BACK_TYPE1_Y / (lidar_posit1on + BACK_TYPE1_X));
 
     ros::Subscriber scan_sub = n.subscribe("scan", 1000, scan_callback);
     ros::Subscriber lidar_sub = n.subscribe("cmd_toggle_Lidar", 1000, lidar_callback);
