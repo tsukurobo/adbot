@@ -5,7 +5,7 @@
 	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
 	<arg name="use_roswww" default="true" />
 	<arg name="arduino" default="true"/>
-	<arg name="lidar_aim" default="true"/>
+	<arg name="lidar_aim" default="false"/>
 
 	<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 	<include if="$(arg use_roswww)" file="$(find roswww)/launch/roswww.launch">
