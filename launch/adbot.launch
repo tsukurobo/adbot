@@ -27,7 +27,9 @@
 	</group>
 
 	<group if="$(arg lidar_aim)">
-		<node name="lidar_aim" pkg="adbot" type="lidar_aim" output="screen"/>	
+		<node name="lidar_aim" pkg="adbot" type="lidar_aim" output="screen">
+			<param name="lidar_pos" value="0.17"/>
+		</node>	
 	
 		<node name="urg_node" pkg="urg_node" type="urg_node" required="true">
 			<param name="ip_address" value="192.168.0.10"/>
