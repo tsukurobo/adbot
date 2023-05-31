@@ -18,7 +18,7 @@ arduino: {
 
   spr: {
     duty: 200,              #Duty
-    init_count_correct: 1122,       #初期値を刃が抜ける方向にどれだけずらすか
+    init_count_correct: 0,       #初期値を刃が抜ける方向にどれだけずらすか
     one_way_count: 1500,    #片道のエンコーダカウント
     stop_time: 500000,      #行ってから折り返すまで静止している時間
     start_break: 1000        #初期位置に戻るときにDutyを0に設定するタイミング(この数値が大きいほど早く止まる)

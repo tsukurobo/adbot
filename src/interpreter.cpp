@@ -11,15 +11,15 @@ ros::Subscriber cmdAimingPoleSub;
 ros::Subscriber cmdReceiveSub;
 
 // m単位
-#define TYPE1_X 1.8
-#define TYPE1_Y 3.2
-#define TYPE2_X 3.7
-#define TYPE2_Y 1.3
-#define BACK_TYPE1_X 8.2
-#define BACK_TYPE1_Y 3.2
-#define BACK_TYPE2_X 6.3
-#define BACK_TYPE2_Y 1.3
-#define TIPE12_r 0.0505
+constexpr double TYPE1_X = 1.8 - 0.05;
+constexpr double TYPE1_Y = 3.2;
+constexpr double TYPE2_X = 3.7 - 0.05;
+constexpr double TYPE2_Y = 1.3;
+constexpr double BACK_TYPE1_X = 8.2 - 0.05;
+constexpr double BACK_TYPE1_Y = 3.2;
+constexpr double BACK_TYPE2_X = 6.3 - 0.05;
+constexpr double BACK_TYPE2_Y = 1.3;
+constexpr double TIPE12_r = 0.0505;
 
 constexpr double degToRad(int deg)
 {
