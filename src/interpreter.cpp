@@ -27,7 +27,7 @@ constexpr double degToRad(int deg)
 }
 int poleTargetDuties[11] = {};
 double poleTargetVelocities[11] = {};
-double poleTargetAngles[] = {degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20)};
+double poleTargetAngles[] = {degToRad(-50), degToRad(0), degToRad(50), degToRad(-18), degToRad(18), degToRad(0), degToRad(-11), degToRad(11), degToRad(-20), degToRad(0), degToRad(20)};
 
 
 
