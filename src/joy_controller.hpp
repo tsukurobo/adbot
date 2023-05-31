@@ -324,7 +324,8 @@ void JoyController::update()
             poleToAim = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 4;
             // aimingPole.publish();
         }
-        if (poleToAim != aimingPole.current && poleToAim > -1)
+        // if (poleToAim != aimingPole.current && poleToAim > -1)
+        if (poleToAim > -1)
         {
             aimingPole.current = poleToAim;
             aimingPole.publish();
@@ -362,7 +363,7 @@ void JoyController::update()
     if (getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
     {
         std_msgs::Float64 pub;
-        pub.data = -getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);
+        pub.data = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);
         angleAdjust.Publisher.publish(pub);
         angleAdjust.sent = true;
     }

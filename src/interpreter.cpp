@@ -43,6 +43,9 @@ void aimingPoleCb(const std_msgs::Int16 &polemsg)
     cmdAnglePub.publish(angle_pub);
     cmdShootingDutyPub.publish(duty_pub);
     cmdShootingVelocityPub.publish(velocity_pub);
+    for(int i = 0; i < 11; i++){
+        ROS_INFO("%d:%lf", i, poleTargetAngles[i]);
+    }
 }
 
 void receiveCb(const std_msgs::Bool &receiveMsg)
@@ -61,7 +64,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     ros::NodeHandle pnh("~");
-    double lidar_position;
+    double lidar_position = 0.17;
     pnh.getParam("lidar_pos", lidar_position);
     poleTargetAngles[0]=-atan(TYPE1_Y / (lidar_position + TYPE1_X));
     poleTargetAngles[4]=0;

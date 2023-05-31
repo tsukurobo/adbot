@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../../../ABU2023_adbot"
+		},
+		{
+			"path": "../../../../ABU2023_adbot/src/adbot_arduino"
 		}
 	],
 	"settings": {
