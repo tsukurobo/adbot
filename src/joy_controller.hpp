@@ -34,19 +34,11 @@ public:
     ros::Publisher Publisher;
     bool sent = false;
     Command(ros::Publisher Publisher);
-    Command();
-    ~Command();
+    Command(){}
+    ~Command(){}
 };
 
 Command::Command(ros::Publisher Publisher) : Publisher(Publisher)
-{
-}
-
-Command::Command(){
-
-}
-
-Command::~Command()
 {
 }
 
@@ -56,19 +48,14 @@ public:
     bool current = false;
     void publish();
     BoolCommand(ros::Publisher Publisher);
-    BoolCommand();
-    ~BoolCommand();
+    BoolCommand(){}
+    ~BoolCommand(){}
 };
 
 BoolCommand::BoolCommand(ros::Publisher Publisher) : Command(Publisher)
 {
 }
 
-BoolCommand::BoolCommand(){
-}
-
-BoolCommand::~BoolCommand(){
-}
 void BoolCommand::publish()
 {
     std_msgs::Bool pub;
@@ -83,18 +70,11 @@ public:
     int16_t current = 0;
     void publish();
     Int16Command(ros::Publisher Publisher);
-    Int16Command();
-    ~Int16Command();
+    Int16Command(){}
+    ~Int16Command(){}
 };
 
 Int16Command::Int16Command(ros::Publisher Publisher) : Command(Publisher)
-{
-}
-
-Int16Command::Int16Command() 
-{
-}
-Int16Command::~Int16Command() 
 {
 }
 
