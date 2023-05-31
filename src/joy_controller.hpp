@@ -34,8 +34,8 @@ public:
     ros::Publisher Publisher;
     bool sent = false;
     Command(ros::Publisher Publisher);
-    Command(){}
-    ~Command(){}
+    Command() {}
+    ~Command() {}
 };
 
 Command::Command(ros::Publisher Publisher) : Publisher(Publisher)
@@ -48,8 +48,8 @@ public:
     bool current = false;
     void publish();
     BoolCommand(ros::Publisher Publisher);
-    BoolCommand(){}
-    ~BoolCommand(){}
+    BoolCommand() {}
+    ~BoolCommand() {}
 };
 
 BoolCommand::BoolCommand(ros::Publisher Publisher) : Command(Publisher)
@@ -70,8 +70,8 @@ public:
     int16_t current = 0;
     void publish();
     Int16Command(ros::Publisher Publisher);
-    Int16Command(){}
-    ~Int16Command(){}
+    Int16Command() {}
+    ~Int16Command() {}
 };
 
 Int16Command::Int16Command(ros::Publisher Publisher) : Command(Publisher)
@@ -81,6 +81,28 @@ Int16Command::Int16Command(ros::Publisher Publisher) : Command(Publisher)
 void Int16Command::publish()
 {
     std_msgs::Int16 pub;
+    pub.data = current;
+    Publisher.publish(pub);
+    sent = true;
+}
+
+struct Float64Command : public Command
+{
+public:
+    double current = 0;
+    void publish();
+    Float64Command(ros::Publisher Publisher);
+    Float64Command() {}
+    ~Float64Command() {}
+};
+
+Float64Command::Float64Command(ros::Publisher Publisher) : Command(Publisher)
+{
+}
+
+void Float64Command::publish()
+{
+    std_msgs::Float64 pub;
     pub.data = current;
     Publisher.publish(pub);
     sent = true;
@@ -106,11 +128,13 @@ private:
     Int16Command aimingPole;
     BoolCommand receive;
     Int16Command shootingDuty;
+    Float64Command shootingVelocity;
     Command angleAdjust;
 
     ros::Subscriber joySub;
     ros::Subscriber cmdAimingPoleSub;
     ros::Subscriber cmdShootingDutySub;
+    ros::Subscriber cmdShootingVelocitySub;
     ros::Subscriber cmdToggleBeltSub;
     ros::Subscriber cmdToggleLidarSub;
     ros::Subscriber cmdEmergencyStopSub;
@@ -121,10 +145,10 @@ private:
     bool executed = true;
 
 public:
-
     void joyCb(const sensor_msgs::Joy &joymsg);
     void cmdAimingPoleCb(const std_msgs::Int16 &msg);
     void cmdShootingDutyCb(const std_msgs::Int16 &msg);
+    void cmdShootingVelocityCb(const std_msgs::Float64 &msg);
     void cmdToggleBeltCb(const std_msgs::Bool &msg);
     void cmdToggleLidarCb(const std_msgs::Bool &msg);
     void cmdEmergencyStopCb(const std_msgs::Bool &msg);
@@ -142,16 +166,17 @@ JoyController::JoyController(ros::NodeHandle &nh)
     aimingPole = Int16Command(nh.advertise<std_msgs::Int16>("cmd_aiming_pole", 10));
     receive = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_receive", 10));
     shootingDuty = Int16Command(nh.advertise<std_msgs::Int16>("cmd_shooting_duty", 10));
+    shootingVelocity = Float64Command(nh.advertise<std_msgs::Float64>("cmd_shooting_velocity", 10));
     angleAdjust = Command(nh.advertise<std_msgs::Float64>("cmd_angle_adjust", 10));
     emergencyStop = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_emergency_stop", 10));
 
-    joySub = nh.subscribe("joy", 10, &JoyController::joyCb,this);
-    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10,  &JoyController::cmdAimingPoleCb,this);
-    cmdShootingDutySub = nh.subscribe("cmd_shooting_duty", 10,  &JoyController::cmdShootingDutyCb,this);
-    cmdToggleBeltSub = nh.subscribe("cmd_toggle_belt", 10,  &JoyController::cmdToggleBeltCb,this);
-    cmdToggleLidarSub = nh.subscribe("cmd_toggle_lidar", 10,  &JoyController::cmdToggleLidarCb,this);
-    cmdEmergencyStopSub = nh.subscribe("cmd_emergency_stop", 10,  &JoyController::cmdEmergencyStopCb,this);
-
+    joySub = nh.subscribe("joy", 10, &JoyController::joyCb, this);
+    cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, &JoyController::cmdAimingPoleCb, this);
+    cmdShootingDutySub = nh.subscribe("cmd_shooting_duty", 10, &JoyController::cmdShootingDutyCb, this);
+    cmdShootingVelocitySub = nh.subscribe("cmd_shooting_velocity", 10, &JoyController::cmdShootingVelocityCb, this);
+    cmdToggleBeltSub = nh.subscribe("cmd_toggle_belt", 10, &JoyController::cmdToggleBeltCb, this);
+    cmdToggleLidarSub = nh.subscribe("cmd_toggle_lidar", 10, &JoyController::cmdToggleLidarCb, this);
+    cmdEmergencyStopSub = nh.subscribe("cmd_emergency_stop", 10, &JoyController::cmdEmergencyStopCb, this);
 }
 
 // void JoyController::init(ros::NodeHandle &nh){
@@ -175,6 +200,10 @@ inline void JoyController::cmdShootingDutyCb(const std_msgs::Int16 &msg)
     shootingDuty.current = msg.data;
 }
 
+inline void JoyController::cmdShootingVelocityCb(const std_msgs::Float64 &msg){
+    shootingVelocity.current = msg.data;
+}
+
 inline void JoyController::cmdToggleBeltCb(const std_msgs::Bool &msg)
 {
     toggleBelt.current = msg.data;
@@ -192,7 +221,8 @@ inline void JoyController::cmdEmergencyStopCb(const std_msgs::Bool &msg)
 
 void JoyController::update()
 {
-    if(executed){
+    if (executed)
+    {
         return;
     }
     ROS_INFO("Interpreting joymsg");
@@ -236,10 +266,24 @@ void JoyController::update()
     {
         emergencyStop.sent = false;
     }
-    else if (!emergencyStop.sent && getJoyValue(joymsg, XBOX_BUTTONS::BACK) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
+    if (!getJoyValue(joymsg, XBOX_BUTTONS::LB))
     {
-        emergencyStop.current = !emergencyStop.current;
-        emergencyStop.publish();
+        if (!emergencyStop.sent && getJoyValue(joymsg, XBOX_BUTTONS::BACK) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
+        {
+            emergencyStop.current = !emergencyStop.current;
+            emergencyStop.publish();
+        }
+    }
+    else
+    {
+        if (getJoyValue(joymsg, XBOX_BUTTONS::BACK) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
+        {   
+            shootingDuty.current=0;
+            shootingDuty.publish();
+            shootingVelocity.current = 0;
+            shootingVelocity.publish();
+            emergencyStop.sent = true;
+        }
     }
 
     // 自動照準
@@ -268,7 +312,7 @@ void JoyController::update()
     }
     else
     {
-        aimingPole.sent=false;
+        aimingPole.sent = false;
         int poleToAim = -1;
         if (getJoyValue(joymsg, XBOX_AXES::CROSS_VER) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
@@ -277,10 +321,11 @@ void JoyController::update()
         }
         else if (getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
         {
-            poleToAim =  getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 4;
+            poleToAim = getJoyValue(joymsg, XBOX_AXES::CROSS_HOR) == 1 ? 5 : 4;
             // aimingPole.publish();
         }
-        if(poleToAim != aimingPole.current && poleToAim>-1){
+        if (poleToAim != aimingPole.current && poleToAim > -1)
+        {
             aimingPole.current = poleToAim;
             aimingPole.publish();
         }
@@ -300,11 +345,15 @@ void JoyController::update()
     // 射出Duty
     if (getJoyValue(joymsg, XBOX_BUTTONS::X) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
+        shootingVelocity.current += 0.25;
+        shootingVelocity.publish();
         shootingDuty.current += 1;
         shootingDuty.publish();
     }
     else if (getJoyValue(joymsg, XBOX_BUTTONS::A) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
+        shootingVelocity.current -= 0.25;
+        shootingVelocity.publish();
         shootingDuty.current -= 1;
         shootingDuty.publish();
     }
