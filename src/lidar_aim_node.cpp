@@ -10,8 +10,8 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int16.h>
 
-#define ANGLE_MIN 500 //0~1079, 1step 0.25°, center 539
-#define ANGLE_MAX 580
+// #define ANGLE_MIN 500 //0~1079, 1step 0.25°, center 539
+// #define ANGLE_MAX 580
 #define MAX_DISTANCE 10
 
 // m単位
@@ -41,13 +41,15 @@ double lidar_posit1on;
 
 double degToRad(double deg)
 {
-    return deg * 3.1415926535 / 180;
+    return deg * M_PI / 180.0;
 }
 
 double distance_angle_list[2][11];// = {{3.758, 1.97, 3.758, 4.083, 4.083, 1.97, 4.355, 4.355, 8.961, 8.37, 8.961}, {degToRad(-45), degToRad(0), degToRad(45), degToRad(-30), degToRad(30), degToRad(0), degToRad(-15), degToRad(15), degToRad(-20), degToRad(0), degToRad(20)}};
 double right_angle;
 double distance_to_pole;
 double around_pole = 0.1;
+double angle_diff_margin = 0.0349;
+double angle_diff_max = 0.0;
 double angle_diff;
 bool bool_pole = false;
 bool detect;
@@ -57,7 +59,18 @@ void scan_callback(sensor_msgs::LaserScan msg)
     // ANGLE_MIN〜ANGLE_MAXで最も近い障害物を検出
     float detect_range = MAX_DISTANCE;
     detect = false;
-    for (int i = ANGLE_MIN; i < ANGLE_MAX; i++) {
+    // for (int i = ANGLE_MIN; i < ANGLE_MAX; i++) {
+    //     if (msg.ranges[i] < distance_to_pole + around_pole && msg.ranges[i] > distance_to_pole - around_pole) {
+    //         if (msg.ranges[i] < detect_range) {
+    //             detect_range = msg.ranges[i];
+    //             point = i;
+    //             detect = true;
+    //         }
+    //     }
+    // }
+    // error_angle.data = -degToRad((point - 539) * 0.25);
+
+    for (int i = 0; i < msg.ranges.size(); i++) {
         if (msg.ranges[i] < distance_to_pole + around_pole && msg.ranges[i] > distance_to_pole - around_pole) {
             if (msg.ranges[i] < detect_range) {
                 detect_range = msg.ranges[i];
@@ -66,7 +79,16 @@ void scan_callback(sensor_msgs::LaserScan msg)
             }
         }
     }
-    error_angle.data = -degToRad((point - 539) * 0.25);
+    error_angle.data = -(msg.angle_min + msg.angle_increment * point);
+
+    // LiDARが動作する、エンコーダの現在値と目標値の差分の最大値を計算
+    // angle_diff_marginは、angle_maxより大きい場合無効
+    if (msg.angle_max > angle_diff_margin) {
+        angle_diff_max = msg.angle_max - angle_diff_margin;
+    }
+    else {
+        angle_diff_max = msg.angle_max;
+    }
 }
 
 void lidar_callback(std_msgs::Bool cmd_toggle_Lidar) {
@@ -98,6 +120,8 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::NodeHandle pnh("~");
     pnh.getParam("lidar_pos", lidar_posit1on);
+    if (pnh.getParam("around_pole", around_pole)) around_pole = abs(around_pole);
+    if (pnh.getParam("angle_diff_margin", angle_diff_margin)) angle_diff_margin = abs(angle_diff_margin);
     // 距離計算
     distance_angle_list[0][0] = sqrt(pow(lidar_posit1on + TYPE1_X, 2) + pow(TYPE1_Y, 2)) - TIPE12_r;
     distance_angle_list[0][1] = TYPE1_X - TIPE12_r;
@@ -139,7 +163,7 @@ int main(int argc, char **argv)
     while (ros::ok()) {
         if (bool_lidar) {
             if (bool_pole && detect) {
-                if (angle_diff < 0.3) {
+                if (angle_diff < angle_diff_max) {
                     pub_angle.publish(error_angle);
                     cmd_angle.publish(error_angle);
                 } else {

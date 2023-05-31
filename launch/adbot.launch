@@ -29,10 +29,14 @@
 	<group if="$(arg lidar_aim)">
 		<node name="lidar_aim" pkg="adbot" type="lidar_aim" output="screen">
 			<param name="lidar_pos" value="0.17"/>
+			<param name="around_pole" value="0.10"/>
+			<param name="angle_diff_margin" value="0.0349"/>
 		</node>	
 	
 		<node name="urg_node" pkg="urg_node" type="urg_node" required="true">
 			<param name="ip_address" value="192.168.0.10"/>
+			<param name="angle_min" value="-0.1745329251994"/>
+			<param name="angle_max" value="0.1745329251994"/>
 		</node>
 
 	</group> 
