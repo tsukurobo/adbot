@@ -83,12 +83,7 @@ void scan_callback(sensor_msgs::LaserScan msg)
 
     // LiDARが動作する、エンコーダの現在値と目標値の差分の最大値を計算
     // angle_diff_marginは、angle_maxより大きい場合無効
-    if (msg.angle_max > angle_diff_margin) {
-        angle_diff_max = msg.angle_max - angle_diff_margin;
-    }
-    else {
-        angle_diff_max = msg.angle_max;
-    }
+    angle_diff_max = msg.angle_max - angle_diff_margin;
 }
 
 void lidar_callback(std_msgs::Bool cmd_toggle_Lidar) {
