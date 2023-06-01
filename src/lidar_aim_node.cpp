@@ -6,7 +6,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float32.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int16.h>
 
@@ -31,7 +31,7 @@ constexpr double TIPE12_r = 0.0505;
 
 using namespace std;
 
-std_msgs::Float64 error_angle;
+std_msgs::Float32 error_angle;
 ros::Publisher pub_angle;
 ros::Publisher cmd_angle;
 
@@ -83,19 +83,19 @@ void pole_callback(std_msgs::Int16 pole_type)
     right_angle = distance_angle_list[1][pole_type.data];
 }
 
-void angle_callback(std_msgs::Float64 angle)
+void angle_callback(std_msgs::Float32 angle)
 {
     angle_diff = abs(angle.data - right_angle);
 }
 
 // 自動モード
-void cmd_angle_callback(std_msgs::Float64 cmd_angle)
+void cmd_angle_callback(std_msgs::Float32 cmd_angle)
 {
     bool_pole = true;
 }
 
 // 手動モード
-void cmd_angle_ad_callback(std_msgs::Float64 cmd_angle_ad)
+void cmd_angle_ad_callback(std_msgs::Float32 cmd_angle_ad)
 {
     bool_pole = false;
 }
@@ -138,8 +138,8 @@ int main(int argc, char **argv)
     ros::Subscriber angle_sub = n.subscribe("cmd_angle", 1000, cmd_angle_callback);
     ros::Subscriber cmd_angle_adjust = n.subscribe("cmd_angle_adjust", 1000, cmd_angle_ad_callback);
 
-    pub_angle = n.advertise<std_msgs::Float64>("error_angle", 1000);
-    cmd_angle = n.advertise<std_msgs::Float64>("cmd_angle", 1000);
+    pub_angle = n.advertise<std_msgs::Float32>("error_angle", 1000);
+    cmd_angle = n.advertise<std_msgs::Float32>("cmd_angle", 1000);
 
     sleep(5);
     ros::Rate loop_rate(10);

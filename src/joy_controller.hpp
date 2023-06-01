@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Int16.h"
-#include "std_msgs/Float64.h"
+#include "std_msgs/Float32.h"
 #include "std_msgs/Bool.h"
 
 enum class XBOX_AXES
@@ -86,23 +86,23 @@ void Int16Command::publish()
     sent = true;
 }
 
-struct Float64Command : public Command
+struct Float32Command : public Command
 {
 public:
     double current = 0;
     void publish();
-    Float64Command(ros::Publisher Publisher);
-    Float64Command() {}
-    ~Float64Command() {}
+    Float32Command(ros::Publisher Publisher);
+    Float32Command() {}
+    ~Float32Command() {}
 };
 
-Float64Command::Float64Command(ros::Publisher Publisher) : Command(Publisher)
+Float32Command::Float32Command(ros::Publisher Publisher) : Command(Publisher)
 {
 }
 
-void Float64Command::publish()
+void Float32Command::publish()
 {
-    std_msgs::Float64 pub;
+    std_msgs::Float32 pub;
     pub.data = current;
     Publisher.publish(pub);
     sent = true;
@@ -128,7 +128,7 @@ private:
     Int16Command aimingPole;
     BoolCommand receive;
     Int16Command shootingDuty;
-    Float64Command shootingVelocity;
+    Float32Command shootingVelocity;
     Command angleAdjust;
 
     ros::Subscriber joySub;
@@ -148,7 +148,7 @@ public:
     void joyCb(const sensor_msgs::Joy &joymsg);
     void cmdAimingPoleCb(const std_msgs::Int16 &msg);
     void cmdShootingDutyCb(const std_msgs::Int16 &msg);
-    void cmdShootingVelocityCb(const std_msgs::Float64 &msg);
+    void cmdShootingVelocityCb(const std_msgs::Float32 &msg);
     void cmdToggleBeltCb(const std_msgs::Bool &msg);
     void cmdToggleLidarCb(const std_msgs::Bool &msg);
     void cmdEmergencyStopCb(const std_msgs::Bool &msg);
@@ -166,8 +166,8 @@ JoyController::JoyController(ros::NodeHandle &nh)
     aimingPole = Int16Command(nh.advertise<std_msgs::Int16>("cmd_aiming_pole", 10));
     receive = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_receive", 10));
     shootingDuty = Int16Command(nh.advertise<std_msgs::Int16>("cmd_shooting_duty", 10));
-    shootingVelocity = Float64Command(nh.advertise<std_msgs::Float64>("cmd_shooting_velocity", 10));
-    angleAdjust = Command(nh.advertise<std_msgs::Float64>("cmd_angle_adjust", 10));
+    shootingVelocity = Float32Command(nh.advertise<std_msgs::Float32>("cmd_shooting_velocity", 10));
+    angleAdjust = Command(nh.advertise<std_msgs::Float32>("cmd_angle_adjust", 10));
     emergencyStop = BoolCommand(nh.advertise<std_msgs::Bool>("cmd_emergency_stop", 10));
 
     joySub = nh.subscribe("joy", 10, &JoyController::joyCb, this);
@@ -200,7 +200,7 @@ inline void JoyController::cmdShootingDutyCb(const std_msgs::Int16 &msg)
     shootingDuty.current = msg.data;
 }
 
-inline void JoyController::cmdShootingVelocityCb(const std_msgs::Float64 &msg){
+inline void JoyController::cmdShootingVelocityCb(const std_msgs::Float32 &msg){
     shootingVelocity.current = msg.data;
 }
 
@@ -362,14 +362,14 @@ void JoyController::update()
     // 射出角度調整
     if (getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
     {
-        std_msgs::Float64 pub;
+        std_msgs::Float32 pub;
         pub.data = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);
         angleAdjust.Publisher.publish(pub);
         angleAdjust.sent = true;
     }
     else if (angleAdjust.sent)
     {
-        std_msgs::Float64 pub;
+        std_msgs::Float32 pub;
         pub.data = 0;
         angleAdjust.Publisher.publish(pub);
         angleAdjust.sent = false;

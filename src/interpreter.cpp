@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/Int16.h"
-#include "std_msgs/Float64.h"
+#include "std_msgs/Float32.h"
 #include "std_msgs/Bool.h"
 
 ros::Publisher cmdAnglePub;
@@ -34,11 +34,11 @@ double poleTargetAngles[] = {degToRad(-50), degToRad(0), degToRad(50), degToRad(
 void aimingPoleCb(const std_msgs::Int16 &polemsg)
 {
     int aimingPole = polemsg.data;
-    std_msgs::Float64 angle_pub;
+    std_msgs::Float32 angle_pub;
     angle_pub.data = poleTargetAngles[aimingPole];
     std_msgs::Int16 duty_pub;
     duty_pub.data = poleTargetDuties[aimingPole];
-    std_msgs::Float64 velocity_pub;
+    std_msgs::Float32 velocity_pub;
     velocity_pub.data = poleTargetVelocities[aimingPole];
     cmdAnglePub.publish(angle_pub);
     cmdShootingDutyPub.publish(duty_pub);
@@ -52,7 +52,7 @@ void receiveCb(const std_msgs::Bool &receiveMsg)
 {
     std_msgs::Int16 duty_pub;
     duty_pub.data = 0;
-    std_msgs::Float64 angle_pub;
+    std_msgs::Float32 angle_pub;
     angle_pub.data = degToRad(receiveMsg.data ? -90 : 90);
     cmdAnglePub.publish(angle_pub);
     cmdShootingDutyPub.publish(duty_pub);
@@ -79,9 +79,9 @@ int main(int argc, char **argv)
     poleTargetAngles[9]=atan(BACK_TYPE1_Y / (lidar_position + BACK_TYPE1_X));
 
 
-    cmdAnglePub = nh.advertise<std_msgs::Float64>("cmd_angle", 10);
+    cmdAnglePub = nh.advertise<std_msgs::Float32>("cmd_angle", 10);
     cmdShootingDutyPub = nh.advertise<std_msgs::Int16>("cmd_shooting_duty", 10);
-    cmdShootingVelocityPub = nh.advertise<std_msgs::Float64>("cmd_shooting_velocity", 10);
+    cmdShootingVelocityPub = nh.advertise<std_msgs::Float32>("cmd_shooting_velocity", 10);
 
     cmdAimingPoleSub = nh.subscribe("cmd_aiming_pole", 10, aimingPoleCb);
     cmdReceiveSub = nh.subscribe("cmd_receive", 10, receiveCb);

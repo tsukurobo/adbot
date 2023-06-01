@@ -19,7 +19,7 @@ ros.on('close', function () {
 const cmdAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/cmd_angle',
-    messageType: 'std_msgs/Float64'
+    messageType: 'std_msgs/Float32'
 });
 
 
@@ -28,6 +28,13 @@ const cmdDuty = new ROSLIB.Topic({
     name: '/cmd_shooting_duty',
     messageType: 'std_msgs/Int16'
 });
+
+const cmdVelocity = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_shooting_velocity',
+    messageType: 'std_msgs/Float32'
+});
+
 
 const cmdAimingPole = new ROSLIB.Topic({
     ros: ros,
@@ -68,19 +75,19 @@ const cmdEmergencyStop = new ROSLIB.Topic({
 const currentAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/angle',
-    messageType: 'std_msgs/Float64'
+    messageType: 'std_msgs/Float32'
 });
 
 const distanceToPole = new ROSLIB.Topic({
     ros: ros,
     name: '/distance_to_pole',
-    messageType: 'std_msgs/Float64'
+    messageType: 'std_msgs/Float32'
 });
 
 const errorAngle = new ROSLIB.Topic({
     ros: ros,
     name: '/error_angle',
-    messageType: 'std_msgs/Float64'
+    messageType: 'std_msgs/Float32'
 });
 
 
@@ -501,7 +508,8 @@ const main = () => {
         updateAngle(message.data, ctx, false);
     });
 
-    cmdDuty.subscribe(function (message) {
+    // cmdDuty.subscribe(function (message) {
+    cmdVelocity.subscribe(function (message) {
         updateDuty(message.data, ctx, false);
     });
 
