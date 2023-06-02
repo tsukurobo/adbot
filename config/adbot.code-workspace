@@ -13,7 +13,13 @@
 	"settings": {
 		"files.associations": {
 			"cmath": "cpp",
-			"complex": "cpp"
+			"complex": "cpp",
+			"array": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"functional": "cpp",
+			"type_traits": "cpp",
+			"typeinfo": "cpp"
 		}
 	}
 }

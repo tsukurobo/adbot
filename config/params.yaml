@@ -13,7 +13,10 @@ arduino: {
     capable_duty: 0.4,
     Kp: 0.5,
     Ki: 0.2,
-    Kd: 0.0
+    Kd: 0.0,
+
+    angle_max: 0.1745329251994,
+    angle_diff_margine: 0.0349,
   },
 
   spr: {

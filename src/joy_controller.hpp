@@ -277,7 +277,7 @@ void JoyController::update()
     else
     {
         if (getJoyValue(joymsg, XBOX_BUTTONS::BACK) && getJoyValue(joymsg, XBOX_BUTTONS::RB))
-        {   
+        {
             shootingDuty.current=0;
             shootingDuty.publish();
             shootingVelocity.current = 0;
@@ -360,7 +360,7 @@ void JoyController::update()
     }
 
     // 射出角度調整
-    if (getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER))
+    if (getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER)&& getJoyValue(joymsg, XBOX_BUTTONS::RB))
     {
         std_msgs::Float32 pub;
         pub.data = getJoyValue(joymsg, XBOX_AXES::JOY_LEFT_VER);

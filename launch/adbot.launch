@@ -5,7 +5,7 @@
 	<arg name="webpath" default="www"/> <!-- relative path to the webroot. E.g. place this foloder in the ROS package root dir -->
 	<arg name="use_roswww" default="true" />
 	<arg name="arduino" default="true"/>
-	<arg name="lidar_aim" default="false"/>
+	<arg name="lidar_aim" default="true"/>
 
 	<include if="$(arg use_roswww)" file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 	<include if="$(arg use_roswww)" file="$(find roswww)/launch/roswww.launch">
@@ -29,13 +29,15 @@
 	<group if="$(arg lidar_aim)">
 		<node name="lidar_aim" pkg="adbot" type="lidar_aim" output="screen">
 			<!-- <param name="lidar_pos" value="0.17"/> -->
-		</node>	
-	
-		<node name="urg_node" pkg="urg_node" type="urg_node" required="true">
-			<param name="ip_address" value="192.168.0.10"/>
 		</node>
 
-	</group> 
+		<node name="urg_node" pkg="urg_node" type="urg_node" required="true">
+			<param name="ip_address" value="192.168.0.10"/>
+			<param name="angle_min" value="-0.1745329251994"/>
+			<param name="angle_max" value="0.1745329251994"/>
+		</node>
+
+	</group>
 
 
 </launch>
