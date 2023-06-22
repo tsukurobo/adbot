@@ -1,5 +1,8 @@
+# Adbot ROS Software
+Adbot, the Rabit Robot of tsukurobo for NHK Robocon 2023, is a ROS based robot. This repository contains the ROS package for Adbot.
 
-This software contains the following open source components:
+## Third Party Software
+This repository contains the following open source component:
 - roslibjs
 ```
 Software License Agreement (BSD License)
