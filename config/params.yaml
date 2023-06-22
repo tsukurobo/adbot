@@ -1,4 +1,41 @@
-belt_duty: 500
+pole: {
 
-pole:
-  duty: [470, 370, 470, 530, 530, 640, 620, 620, 620, 620, 620]
+  duty: [100,100,505,593,380,600,600,593,505,100,100],
+  velocity: [1.0,2.0,3.0,140.0,99.5,160.0,170.0,140.0,9.0,0.0,1.0] # DO NOT FORGET ".0" AT THE END OF INTEGERS!!!!!!
+}
+
+lidar_pos: 0.17
+arduino: {
+  aim: {
+    manual_duty: 200, #手動照準のDuty
+
+    # 照準の位置PIDゲイン
+    capable_duty: 0.4,
+    Kp: 0.5,
+    Ki: 0.2,
+    Kd: 0.0,
+
+    angle_max: 0.1745329251994,
+    angle_diff_margine: 0.0349,
+  },
+
+  spr: {
+    duty: 230,              #Duty
+    init_count_correct: 0,      #初期値を刃が抜ける方向にどれだけずらすか
+    one_way_count: 1500,    #片道のエンコーダカウント
+    stop_time: 500000,      #行ってから折り返すまで静止している時間
+    start_break: 1000        #初期位置に戻るときにDutyを0に設定するタイミング(この数値が大きいほど早く止まる)
+  },
+
+  shoot: {
+    belt_duty: 750,
+    bias_to_upper_roller: 1.0,
+
+    # # 射出の速度PIDゲイン
+    capable_duty: 0.8,
+    # # 左上、左下、右上、右下
+    Kp: [1.0, 1.0, 1.0, 1.0],
+    Ki: [0.0, 0.0, 0.0, 0.0],
+    Kd: [0.0, 0.0, 0.0, 0.0]
+  },
+}

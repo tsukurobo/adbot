@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../../ABU2023_adbot"
+		},
+		{
+			"path": "../../../../ABU2023_adbot/src/adbot_arduino"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cmath": "cpp",
+			"complex": "cpp",
+			"array": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"functional": "cpp",
+			"type_traits": "cpp",
+			"typeinfo": "cpp"
+		}
+	}
+}
